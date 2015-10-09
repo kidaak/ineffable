@@ -1,37 +1,58 @@
 """
 https://www.jasondavies.com/wordcloud/
-create_file("01cannabis",word_chisq("cannabis",n=250,stops=False)) 
-create_file("02mushrooms",word_chisq("mushrooms",n=250,stops=False)) 
-create_file("03salvia",word_chisq("salvia",n=250,stops=False)) 
-create_file("04alcohol",word_chisq("alcohol",n=250,stops=False)) 
-create_file("05mdma",word_chisq("mdma",n=250,stops=False)) 
-create_file("06lsd",word_chisq("lsd",n=250,stops=False)) 
-create_file("07dxm",word_chisq("dxm",n=250,stops=False))
-create_file("08tobacco",word_chisq("tobacco",n=250,stops=False)) 
+create_file("01cannabis", word_chisq("cannabis",data=bdata, n=250,stops=False), binary=False) 
+create_file("02mushrooms", word_chisq("mushrooms",data=ldata, n=250,stops=False), binary=False) 
+create_file("03salvia", word_chisq("salvia",data=ldata, n=250,stops=False), binary=False) 
+create_file("04alcohol", word_chisq("alcohol",data=bdata, n=250,stops=False), binary=True) 
+create_file("05mdma", word_chisq("mdma",data=bdata, n=250,stops=False), binary=True) 
+create_file("06lsd", word_chisq("lsd",data=ldata, n=250,stops=False), binary=False) 
+create_file("07dxm", word_chisq("dxm",data=bdata, n=250,stops=False), binary=True)
+create_file("08tobacco", word_chisq("tobacco",data=bdata, n=250,stops=False), binary=True) 
+
+create_file("trainwrecks", word_chisq("Train Wrecks & Trip Disasters",data=bdata, n=250,stops=False), binary=True) 
+create_file("badtrips", word_chisq("Bad Trips",data=bdata, n=250,stops=False), binary=True)
+create_file("mystical", word_chisq("Mystical Experiences",data=bdata, n=250,stops=False), binary=True)
+create_file("glowing", word_chisq("Glowing Experiences",data=bdata, n=250,stops=False), binary=True)
+create_file("difficult", word_chisq("Difficult Experiences",data=bdata, n=250,stops=False), binary=True)
+
+
+09 cocaine
+10 amphetamines
+11 2-CI
+12 Monrning Glory
+13 Nitrous
+14 Syrian Rue
+15 Meth
+16 5-MEO-DMT
+17 DMT
+18 Ketamine
+19 5-MEO-DIPT
+
+
+
 """
 
 if __name__ == "__main__":
-	path = 'C:/Users/Glenn/Documents/GitHub/mining-erowid/'
+	path = 'C:/Users/Glenn/Documents/GitHub/ineffable/'
 	import os, re, pickle, bs4, nltk, random, numpy as np
 	from sklearn.feature_extraction.text import CountVectorizer
 	from sklearn.preprocessing import normalize
-	path = 'C:/Users/Glenn/Documents/GitHub/mining-erowid/'
-	vectorizer = pickle.load(open(path+"vectorizer.p","rb"))
-	bowdata = pickle.load(open(path+"data.p","rb"))
+	vectorizer = pickle.load(open(path+"data/pickle/vectorizer.p","rb"))
+	bowdata = pickle.load(open(path+"data/pickle/data.p","rb"))
 	ndata = 1000*normalize(bowdata.astype(np.float), norm='l1',axis=1)
 	ldata = bowdata.copy()
 	ldata.data = np.log(bowdata.data+1)
 	lndata = 1000*normalize(ldata.astype(np.float), norm='l1',axis=1)
 	bdata = bowdata.astype(bool)
-	experiences = pickle.load(open(path+"experience_index.p","rb"))
-	substance_index = pickle.load(open(path+"substance_index.p","rb"))
-	tag_index = pickle.load(open(path+"tag_index.p","rb"))
-	substance_count = pickle.load(open(path+"substance_count.p","rb"))
-	tag_count = pickle.load(open(path+"tag_count.p","rb"))
+	experiences = pickle.load(open(path+"data/pickle/experience_index.p","rb"))
+	substance_index = pickle.load(open(path+"data/pickle/substance_index.p","rb"))
+	tag_index = pickle.load(open(path+"data/pickle/tag_index.p","rb"))
+	substance_count = pickle.load(open(path+"data/pickle/substance_count.p","rb"))
+	tag_count = pickle.load(open(path+"data/pickle/tag_count.p","rb"))
 	all_tags = sorted(tag_count.keys() + substance_count.keys())
 	all_index = [tag_index[n] + substance_index[n] for n,row in enumerate(experiences)]
 	vocab = np.array(vectorizer.get_feature_names())
-	with open(path+"files/stopwords.txt") as file:
+	with open(path+"data/files/stopwords.txt") as file:
 		substops = set([line.replace("\n","") for line in file.readlines()])
 			
 	def rowslice(lst, data=ndata):
@@ -77,7 +98,90 @@ if __name__ == "__main__":
 				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
 		return values[0:n]
 		
-	
+	y,n,x = "y","n","x"
+	def create_file(key, values, suffix="", filter=True, binary=False, nwords=50): 
+		filename = key+suffix
+		filename+=".txt"
+		
+		print "Building " +  filename + ":"
+		with open(path+"master/output/" + filename,"w") as file:
+			j = 0
+			for value in values:
+				if j!=None and j>nwords:
+					return
+					
+				if filter==True:
+					response = input("Use " + str(value) + "? (" + str(j) + " words so far) (y/n/x)")
+				else:
+					response = "y"
+				
+				if response == "y":	
+					if binary==True:
+						r = int(value[0]/10)
+					else:
+						r = int(value[0]/100)
+					for i in range(r):
+						file.write(value[1])
+						file.write(" ")
+					print "Wrote " + str(value[1]) + " " + str(r) + " times."
+					j+=1
+				elif response == "x":
+					print "Finished " + filename + "."
+					return
+				else:
+					continue
+					
+	def examples(word, lst=None, sort=True, n=5):
+		sub, _, _, _, subexps = rowslice(lst)
+		wdata = sub[:,vocab==word].toarray()
+		ranking = np.argsort(wdata[:,0])[::-1]
+		exps = []
+		for rank in ranking:
+			if wdata[rank,0] > 0:
+				exps.append(subexps[rank])
+				
+		if sort==False:
+			exps = sorted(exps, key=lambda *args: random.random())
+			
+		return exps[0:n]
+		
+	def read_examples(word, lst=None, sort=True, n=5):
+		files = examples(word, lst, sort, n)
+		print "Word occurs in " + str(len(files)) + " files. (note this is wrong!)"
+		for name in files:
+			dummy = raw_input("*************Next report?**************")
+			with open(path+"data/xml/"+name) as f:	
+				txt = f.read()
+				txt = txt.replace("*","")
+				txt = txt.replace(word,"***"+word+"***")
+				txt = txt.replace(word.capitalize(),"***"+word.capitalize()+"***")
+				print txt
+		
+		
+	def tag_chisq(key, n=10):
+		from sklearn.feature_selection import chi2
+		if key in all_tags:
+			labels = [(key in row) for row in all_index]
+		else:
+			raise ValueError('Not a valid tag or substance')
+			
+		mat = np.zeros((len(experiences),len(all_tags)))
+		for i,row in enumerate(experiences):
+			for j,tag in enumerate(all_tags):
+				if tag in all_index[i]:
+					mat[i,j] = True
+				else:
+					mat[i,j] = False
+			
+		chisq, p = chi2(mat, labels)
+		ranking = np.argsort(chisq)[::-1]
+		values = []
+		for rank in ranking:
+			values.append((chisq[rank],all_tags[rank],p[rank]))
+		return values[0:n]
+						
+				
+				
 	def word_mannwhitney(key, data=ndata, vocab=vocab, index=all_index, method="raw", n=10, stops=True):
 		if key in all_tags:
 			labels = [(key in row) for row in index]
@@ -121,93 +225,13 @@ if __name__ == "__main__":
 	
 		return values[0:n]
 		
-	y,n,x = "y","n","x"
-	def create_file(key, values, suffix="", filter=True, binary=False, nwords=50): 
-		filename = key+suffix
-		filename+=".txt"
-		
-		print "Building " +  filename + ":"
-		with open(path+"output/" + filename,"w") as file:
-			j = 0
-			for value in values:
-				if j!=None and j>nwords:
-					return
-					
-				if filter==True:
-					response = input("Use " + str(value) + "? (" + str(j) + " words so far) (y/n/x)")
-				else:
-					response = "y"
-				
-				if response == "y":	
-					if binary==True:
-						r = int(value[0]/10)
-					else:
-						r = int(value[0]/100)
-					for i in range(r):
-						file.write(value[1])
-						file.write(" ")
-					print "Wrote " + str(value[1]) + " " + str(r) + " times."
-					j+=1
-				elif response == "x":
-					print "Finished " + filename + "."
-					return
-				else:
-					continue
-					
-					
-	def examples(word, lst=None, sort=True, n=5):
-		sub, _, _, _, subexps = rowslice(lst)
-		wdata = sub[:,vocab==word].toarray()
-		ranking = np.argsort(wdata[:,0])[::-1]
-		exps = []
-		for rank in ranking:
-			if wdata[rank,0] > 0:
-				exps.append(subexps[rank])
-				
-		if sort==False:
-			exps = sorted(exps, key=lambda *args: random.random())
-			
-		return exps[0:n]
-		
-	def read_examples(word, lst=None, sort=True, n=5):
-		files = examples(word, lst, sort, n)
-		print "Word occurs in " + str(len(files)) + " files. (note this is wrong!)"
-		for name in files:
-			dummy = raw_input("*************Next report?**************")
-			with open(path+"xml/"+name) as f:	
-				txt = f.read()
-				txt = txt.replace("*","")
-				txt = txt.replace(word,"***"+word+"***")
-				txt = txt.replace(word.capitalize(),"***"+word.capitalize()+"***")
-				print txt
-		
 		
 	def sample(data=ndata, rows=1000):
 		shuffle = range(data.shape[0])[0:rows]
 		return data[sorted(shuffle, key=lambda *args: random.random()),:]
 		
 		
-	def tag_chisq(key, n=10):
-		from sklearn.feature_selection import chi2
-		if key in all_tags:
-			labels = [(key in row) for row in all_index]
-		else:
-			raise ValueError('Not a valid tag or substance')
-			
-		mat = np.zeros((len(experiences),len(all_tags)))
-		for i,row in enumerate(experiences):
-			for j,tag in enumerate(all_tags):
-				if tag in all_index[i]:
-					mat[i,j] = True
-				else:
-					mat[i,j] = False
-			
-		chisq, p = chi2(mat, labels)
-		ranking = np.argsort(chisq)[::-1]
-		values = []
-		for rank in ranking:
-			values.append((chisq[rank],all_tags[rank],p[rank]))
-		return values[0:n]
+
 		
 		
 	def exclude_words(data=bowdata, lst=[]):
