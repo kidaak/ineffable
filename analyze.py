@@ -10,7 +10,8 @@ create_file("07dxm", word_chisq("dxm",data=bdata, n=250,stops=False), binary=Tru
 create_file("08tobacco", word_chisq("tobacco",data=bdata, n=250,stops=False), binary=True)
 create_file("09cocaine", word_chisq("cocaine",data=bdata, n=250,stops=False), binary=True)
 create_file("112ci", word_chisq("2ci",data=bdata, n=250,stops=False), binary=True)  
-
+create_file("101512speed", word_chisq(["meth","amphetamines"],data=bdata, n=250,stops=False), binary=True)
+create_file("13nitrous", word_chisq("nitrous",data=bdata, n=250, minwords=5, stops=False), binary=True)
 create_file("17dmt", word_chisq("dmt",data=bdata, n=250,stops=False), binary=True)  
 
 create_file("trainwrecks", word_chisq("Train Wrecks & Trip Disasters",data=bdata, n=250,stops=False), binary=True) 
@@ -18,6 +19,8 @@ create_file("badtrips", word_chisq("Bad Trips",data=bdata, n=250,stops=False), b
 create_file("mystical", word_chisq("Mystical Experiences",data=bdata, n=250,stops=False), binary=True)
 create_file("glowing", word_chisq("Glowing Experiences",data=bdata, n=250,stops=False), binary=True)
 create_file("difficult", word_chisq("Difficult Experiences",data=bdata, n=250,stops=False), binary=True)
+
+create_file("06lsd", word_chisq("lsd",data=bdata, n=250,maxwords=250), binary=True)
 
 
 10 amphetamines
@@ -66,6 +69,8 @@ if __name__ == "__main__":
 					data=ndata,
 					vocab=vocab,
 					n=10,
+					minwords=0,
+					maxwords=1000,
 					stops=False):
 		from sklearn.feature_selection import chi2
 		if type(key) == str:
@@ -100,8 +105,8 @@ if __name__ == "__main__":
 				
 			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
 				continue
-			elif not np.isnan(chisq[rank]):
-				values.append((vocab[rank],chisq[rank],p[rank],freqs[:,rank][0,0]))
+			elif not np.isnan(chisq[rank]) and not freqs[:,rank]<minwords and not freqs[:,rank]>maxwords:
+				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
 				i+=1
 				
 		return values[0:n]
