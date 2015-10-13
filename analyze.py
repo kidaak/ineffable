@@ -7,7 +7,11 @@ create_file("04alcohol", word_chisq("alcohol",data=bdata, n=250,stops=False), bi
 create_file("05mdma", word_chisq("mdma",data=bdata, n=250,stops=False), binary=True) 
 create_file("06lsd", word_chisq("lsd",data=ldata, n=250,stops=False), binary=False) 
 create_file("07dxm", word_chisq("dxm",data=bdata, n=250,stops=False), binary=True)
-create_file("08tobacco", word_chisq("tobacco",data=bdata, n=250,stops=False), binary=True) 
+create_file("08tobacco", word_chisq("tobacco",data=bdata, n=250,stops=False), binary=True)
+create_file("09cocaine", word_chisq("cocaine",data=bdata, n=250,stops=False), binary=True)
+create_file("112ci", word_chisq("2ci",data=bdata, n=250,stops=False), binary=True)  
+
+create_file("17dmt", word_chisq("dmt",data=bdata, n=250,stops=False), binary=True)  
 
 create_file("trainwrecks", word_chisq("Train Wrecks & Trip Disasters",data=bdata, n=250,stops=False), binary=True) 
 create_file("badtrips", word_chisq("Bad Trips",data=bdata, n=250,stops=False), binary=True)
@@ -16,7 +20,6 @@ create_file("glowing", word_chisq("Glowing Experiences",data=bdata, n=250,stops=
 create_file("difficult", word_chisq("Difficult Experiences",data=bdata, n=250,stops=False), binary=True)
 
 
-09 cocaine
 10 amphetamines
 11 2-CI
 12 Monrning Glory
@@ -28,6 +31,9 @@ create_file("difficult", word_chisq("Difficult Experiences",data=bdata, n=250,st
 18 Ketamine
 19 5-MEO-DIPT
 
+
+
+word_chisq("lsd",reference=[k for k in substance_count.keys())
 
 
 """
@@ -54,49 +60,52 @@ if __name__ == "__main__":
 	vocab = np.array(vectorizer.get_feature_names())
 	with open(path+"data/files/stopwords.txt") as file:
 		substops = set([line.replace("\n","") for line in file.readlines()])
-			
-	def rowslice(lst, data=ndata):
-		if lst==None:
-			return data, tag_index, substance_index, all_index, experiences
-			
-		if type(lst)==str:
-			lst = [lst]
-		indices = []
-		slice_tags = []
-		slice_substances = []
-		slice_exps = []
-		for n,exp in enumerate(experiences):
-			for item in lst:
-				if item in tag_index[n] or item in substance_index[n]:
-					indices.append(n)
-					slice_tags.append(tag_index[n])
-					slice_substances.append(substance_index[n])
-					slice_exps.append(experiences[n])
-					slice_all = [slice_tags[n] + slice_substances[n] for n,row in enumerate(slice_exps)]
-					break
-		return data[indices], slice_tags, slice_substances, slice_all, slice_exps
-	
 		
-	def word_chisq(key, data=ndata, vocab=vocab, index=all_index, method="raw", n=10, stops=True):
+	def word_chisq(	key,
+					reference=None,
+					data=ndata,
+					vocab=vocab,
+					n=10,
+					stops=False):
 		from sklearn.feature_selection import chi2
-		if key in all_tags:
-			labels = [(key in row) for row in index]
+		if type(key) == str:
+				key = [key]
+
+		if reference == None:
+			refdata = data
+			refs = [True for row in all_index]
+			refs = np.array(refs)
 		else:
-			raise ValueError('Not a valid tag or substance')
-			
-		chisq, p = chi2(data, labels)
+			if type(reference) == str:
+				reference = [reference]
+				
+			refs = [(True in [(k in row) for k in reference]) for row in all_index]
+			refs = np.array(refs)
+			refdata = data[refs,:]
+
+		#okay...so we're gettin' there...refdata now works correctly, but labels is wrong
+		labels = [(True in [(k in row) for k in key]) for row in all_index]
+		labels = np.array(labels)
+		labels = labels[refs]
+
+		chisq, p = chi2(refdata, labels)
 		ranking = np.argsort(chisq)[::-1]
 		values = []
+		freqs = (refdata > 0)[labels,:].sum(axis=0)
 		
-		counts = rowslice(key,data=bdata)[0]
-		freqs = counts.sum(axis=0)
-		
+		i = 0
 		for rank in ranking:
+			if i >= n:
+				break
+				
 			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
 				continue
-			else:
-				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
+			elif not np.isnan(chisq[rank]):
+				values.append((vocab[rank],chisq[rank],p[rank],freqs[:,rank][0,0]))
+				i+=1
+				
 		return values[0:n]
+		
 		
 	y,n,x = "y","n","x"
 	def create_file(key, values, suffix="", filter=True, binary=False, nwords=50): 
