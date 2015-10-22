@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+  <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script src="d3.min.js"></script>
   <script src="d3.layout.cloud.js"></script>
   	<script>
-function sub() {
-	
-var fill = d3.scale.category20();
-
-var svg = document.getElementById("svg");
-while (svg.lastChild) {
-    svg.removeChild(svg.lastChild);
+ 	
+$.urlParam = function(name){
+	var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (!results) {return 0;}
+	return results[1] || 0;
 }
+function init() {
 
-
+var fill = d3.scale.category20();
 
 var WIDTH = 1000;
 var HEIGHT = 500;
-var WORDS = document.getElementById("words").value.split(" ");
-
+var words = $.urlParam("words") || "Hello,world,normally,you,want,more,words,than,this,okay,lets,add,more,words,lots,more,even";
+var WORDS = words.split(",");
 var myScale = function(d) {
 	var i = WORDS.indexOf(d);
 	var MIN = 10;
@@ -74,16 +74,8 @@ function draw(words) {
     <meta charset="UTF-8">
     <title>Ineffable by infiniteperplexity</title>
   </head>
-  <body>
-  	<div>
-  	<form>
-  		Words:
-  		<input type="text" id="words" value="Hello world normally you want more words than this okay lets add more words lots more even">
-  		<br>
-  		<input type="button" onclick="sub();" value="submit">
-  	</form>
-  	</div>
+  <body onload="init();">
   	<svg id="svg"></svg>
   	<canvas id="canvas" width="1000" height="500"></canvas>
-  </body>
-</html>
+  
+</body></html>
