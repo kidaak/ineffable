@@ -43,7 +43,7 @@ word_chisq("lsd",reference=[k for k in substance_count.keys())
 
 if __name__ == "__main__":
 	path = 'C:/Users/Glenn/Documents/GitHub/ineffable/'
-	import os, re, pickle, bs4, nltk, random, numpy as np
+	import os, re, pickle, bs4, nltk, random, numpy as np, json
 	from sklearn.feature_extraction.text import CountVectorizer
 	from sklearn.preprocessing import normalize
 	vectorizer = pickle.load(open(path+"data/pickle/vectorizer.p","rb"))
@@ -58,6 +58,8 @@ if __name__ == "__main__":
 	tag_index = pickle.load(open(path+"data/pickle/tag_index.p","rb"))
 	substance_count = pickle.load(open(path+"data/pickle/substance_count.p","rb"))
 	tag_count = pickle.load(open(path+"data/pickle/tag_count.p","rb"))
+	with open(path+"data/customstops.json","rb") as f:
+		customstops = json.loads(f.read())
 	all_tags = sorted(tag_count.keys() + substance_count.keys())
 	all_index = [tag_index[n] + substance_index[n] for n,row in enumerate(experiences)]
 	vocab = np.array(vectorizer.get_feature_names())
@@ -71,7 +73,7 @@ if __name__ == "__main__":
 					n=10,
 					minwords=0,
 					maxwords=1000,
-					stops=False):
+					stops=[]):
 		from sklearn.feature_selection import chi2
 		if type(key) == str:
 				key = [key]
@@ -103,14 +105,36 @@ if __name__ == "__main__":
 			if i >= n:
 				break
 				
-			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-				continue
-			elif not np.isnan(chisq[rank]) and not freqs[:,rank]<minwords and not freqs[:,rank]>maxwords:
+			if not np.isnan(chisq[rank]) and not freqs[:,rank]<minwords and not freqs[:,rank]>maxwords and vocab[rank] not in stops:
 				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
 				i+=1
 				
 		return values[0:n]
 		
+		
+	y,n,x = "y","n","x"
+	def curate(key, values, stops = customstops, jsonize=False):
+		j = 0
+		for value in values:
+			response = input("Use " + str(value) + "? (" + str(j) + " words so far) (y/n/x)")
+			if response == "n":
+				if key not in stops:
+					stops[key] = []
+				if value[1] not in stops[key]:
+					stops[key].append(value[1])
+					print "Added " + value[1] + " to the custom stopword list entry for " + key + "."
+					j+=1
+			elif response == "x":
+				if jsonize:		
+					with open(path+'data/customstops.json', 'w') as outfile:
+						json.dump(stops, outfile)
+						print "Dumped stopwords to file."
+				else:
+					print "Finished adding stopwords"
+				break
+						
+	curate("lsd",word_chisq("lsd",data=ldata, n=250))		
+					
 		
 	y,n,x = "y","n","x"
 	def create_file(key, values, suffix="", filter=True, binary=False, nwords=50): 
