@@ -68,6 +68,10 @@ function draw(words) {
 	img.onload = function() { ctx.drawImage(img,0,0); }
 	var png = canvas.toDataURL();
 	svg.style.display = "none";
+	var p = document.createElement("p");
+	var t = document.createTextNode(png);
+	p.appendChild(t);
+	document.getElementById("b").appendChild(p);
 }
 
   	</script>
