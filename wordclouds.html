@@ -72,6 +72,7 @@ function draw(words) {
 	var t = document.createTextNode(png);
 	p.appendChild(t);
 	document.getElementById("b").appendChild(p);
+	document.onload = function() {document.getElementById("b").appendChild(p);}
 }
 
   	</script>
