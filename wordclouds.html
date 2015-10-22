@@ -59,16 +59,19 @@ function draw(words) {
       })
       .text(function(d) { return d.text; });
 }
-svg = document.getElementById("svg");
-var img = new Image;
-var xml = (new XMLSerializer).serializeToString(svg);
-img.src = "data:image/svg+xml;charset=utf-8,"+xml;
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext('2d');
-ctx.drawImage(img,0,0);
-var png = canvas.toDataURL();
-svg.style.display = "none";
+	svg = document.getElementById("svg");
+	var img = new Image;
+	var xml = (new XMLSerializer).serializeToString(svg);
+	img.src = "data:image/svg+xml;charset=utf-8,"+xml;
+	var canvas = document.getElementById("canvas");
+	var ctx = canvas.getContext('2d');
+	var w = window.open('','','width=1,height=1');
+	w.close();
+	ctx.drawImage(img,0,0);
+	var png = canvas.toDataURL();
+	svg.style.display = "none";
 }
+
   	</script>
     <meta charset="UTF-8">
     <title>Ineffable by infiniteperplexity</title>
@@ -84,7 +87,5 @@ svg.style.display = "none";
   	</div>
   	<svg id="svg"></svg>
   	<canvas id="canvas" width="1000" height="500"></canvas>
-  	<img id="img" width="1000" height="500">
-	
   </body>
 </html>
