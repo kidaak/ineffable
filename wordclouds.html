@@ -65,9 +65,7 @@ function draw(words) {
 	img.src = "data:image/svg+xml;charset=utf-8,"+xml;
 	var canvas = document.getElementById("canvas");
 	var ctx = canvas.getContext('2d');
-	var w = window.open('','','width=1,height=1');
-	w.close();
-	ctx.drawImage(img,0,0);
+	img.onload = function() { ctx.drawImage(img,0,0); }
 	var png = canvas.toDataURL();
 	svg.style.display = "none";
 }
