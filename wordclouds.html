@@ -1,78 +1,90 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+  <script src="d3.min.js"></script>
+  <script src="d3.layout.cloud.js"></script>
   	<script>
-  	function init() {
-  		var HEIGHT = 1000;
-  		var WIDTH = 1000;
-  		var MAX = 9;
-  		var MIN = 3;
-  		var words = ["looking","tree","car","around","saw","ate","car","house","tent","walked","walk","walking","thought","seemed","looked","walls","floor","ceiling"];
-  		var canvas = document.getElementById("c");
-  		canvas.width = WIDTH;
-  		canvas.height = HEIGHT;
-  		var ctx = canvas.getContext("2d");
-  		ctx.fillStyle="rgba(255,255,255,1)";
-		ctx.fillRect(0,0,WIDTH,HEIGHT); 
-		ctx.fillStyle="#000000";
-  		var y;
-  		var s;
-  		var r;
-  		var k = 0;
-  		var pixels;
-  		var word;
-  		var w;
-  		var fail;
-  		ctx.translate(WIDTH/2,HEIGHT/2);
-  		for (var i = 0; i < words.length; i++) {
-	  		if (k > 1000) {
-		  		alert("failed.");
-		  		break;
-	  		}
-	  		ctx.save();
-	  		s = Math.pow(MAX-i*(MAX-MIN)/words.length, 2);
-	  		ctx.font = "bold " + s + "px Comic Sans MS";
-	  		word = words[i];
-	  		w = Math.floor(ctx.measureText(word).width);
-	  		r = Math.random()*2*Math.PI;
-	  		ctx.rotate(r);
-	  		y = Math.floor((Math.random() * (WIDTH/2))-s); 
-	  		ctx.translate(0,-y);
-	  		pixels = ctx.getImageData(0,-s,w,s).data;
-	  		fail = false;
-	  		for (var j = 0; j < pixels.length; j+=4) {
-		  		if (j==0) {
-			  		alert([pixels[0],pixels[1],pixels[2],pixels[3]]);
-		  		}
-		  		if (pixels[j]>0) {
-			  		alert(pixels[j]);
-			  		fail = true;
-			  		break;
-		  		}
-	  		}
-	  		if (fail == false) {
-		  		if (r >= Math.PI/2 && r <= Math.PI) {
-			  		ctx.rotate(-Math.PI);
-		  		} else if (r >= Math.PI && r <= 3*Math.PI/2) {
-			  		ctx.rotate(Math.PI);
-		  		}
-	  			ctx.fillText(words[i],0,0);
-  			} else {
-	  			i--;
-	  			alert("skipped " + word);
-  			}
-	  		ctx.restore();
-	  		k+=1;
-  		}
-	}
+function sub() {
+	
+var fill = d3.scale.category20();
+
+var svg = document.getElementById("svg");
+while (svg.lastChild) {
+    svg.removeChild(svg.lastChild);
+}
+
+
+
+var WIDTH = 1000;
+var HEIGHT = 500;
+var WORDS = document.getElementById("words").value.split(" ");
+
+var myScale = function(d) {
+	var i = WORDS.indexOf(d);
+	var MIN = 10;
+	var MAX = 100;
+	var s = Math.exp((Math.log(MAX) - i*(Math.log(MAX)-Math.log(MIN))/WORDS.length));
+	return s;
+}
+var layout = d3.layout.cloud()
+    .size([WIDTH, HEIGHT])
+    .words(
+      WORDS.map(function(d) {;
+      return {text: d, size:myScale(d) , test: "haha"};
+    }))
+    .spiral("archimedean")
+    .padding(5)
+    .font("Impact")
+    .fontSize(function(d) { return d.size; })
+    .on("end", draw);
+
+layout.start();
+
+function draw(words) {
+  //d3.select("body").append("svg")
+  d3.select("svg")
+      .attr("width", layout.size()[0])
+      .attr("height", layout.size()[1])
+    .append("g")
+      .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+    .selectAll("text")
+      .data(words)
+    .enter().append("text")
+      .style("font-size", function(d) { return d.size + "px"; })
+      .style("font-family", "Impact")
+      .style("fill", function(d, i) { return fill(i); })
+      .attr("text-anchor", "middle")
+      .attr("transform", function(d) {
+        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+      })
+      .text(function(d) { return d.text; });
+}
+svg = document.getElementById("svg");
+var img = new Image;
+var xml = (new XMLSerializer).serializeToString(svg);
+img.src = "data:image/svg+xml;charset=utf-8,"+xml;
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
+ctx.drawImage(img,0,0);
+var png = canvas.toDataURL();
+svg.style.display = "none";
+}
   	</script>
     <meta charset="UTF-8">
     <title>Ineffable by infiniteperplexity</title>
   </head>
-  <body onload="init();">
+  <body>
   	<div>
-  	<canvas id="c">
-  	</canvas>
+  	<form>
+  		Words:
+  		<input type="text" id="words" value="Hello world normally you want more words than this okay lets add more words lots more even">
+  		<br>
+  		<input type="button" onclick="sub();" value="submit">
+  	</form>
   	</div>
+  	<svg id="svg"></svg>
+  	<canvas id="canvas" width="1000" height="500"></canvas>
+  	<img id="img" width="1000" height="500">
+	
   </body>
 </html>
