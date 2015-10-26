@@ -1,27 +1,25 @@
 """
 https://www.jasondavies.com/wordcloud/
-create_file("01cannabis", word_chisq("cannabis",data=bdata, n=250,stops=False), binary=False) 
-create_file("02mushrooms", word_chisq("mushrooms",data=ldata, n=250,stops=False), binary=False) 
-create_file("03salvia", word_chisq("salvia",data=ldata, n=250,stops=False), binary=False) 
-create_file("04alcohol", word_chisq("alcohol",data=bdata, n=250,stops=False), binary=True) 
-create_file("05mdma", word_chisq("mdma",data=bdata, n=250,stops=False), binary=True) 
-create_file("06lsd", word_chisq("lsd",data=ldata, n=250,stops=False), binary=False) 
-create_file("07dxm", word_chisq("dxm",data=bdata, n=250,stops=False), binary=True)
-create_file("08tobacco", word_chisq("tobacco",data=bdata, n=250,stops=False), binary=True)
-create_file("09cocaine", word_chisq("cocaine",data=bdata, n=250,stops=False), binary=True)
-create_file("112ci", word_chisq("2ci",data=bdata, n=250,stops=False), binary=True)  
-create_file("101512speed", word_chisq(["meth","amphetamines"],data=bdata, n=250,stops=False), binary=True)
-create_file("13nitrous", word_chisq("nitrous",data=bdata, n=250, minwords=5, stops=False), binary=True)
-create_file("17dmt", word_chisq("dmt",data=bdata, n=250,stops=False), binary=True)  
+curate("cannabis",word_chisq("cannabis",data=ldata, n=250),jsonize=True)
+	curate("mushrooms",word_chisq("mushrooms",data=ldata, n=250),jsonize=True)
+	curate("salvia",word_chisq("salvia",data=ldata, n=250),jsonize=True)
+	curate("alcohol",word_chisq("alcohol",data=ldata, n=250),jsonize=True)
+	curate("mdma",word_chisq("mdma",data=ldata, n=250),jsonize=True)
+	curate("lsd",word_chisq("lsd",data=ldata, n=250),jsonize=True)
+	curate("dxm",word_chisq("dxm",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("tobacco",word_chisq("tobacco",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("cocaine",word_chisq("cocaine",data=ldata, n=250),jsonize=True)	
+	curate("nitrous",word_chisq("nitrous",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("dmt",word_chisq("dmt",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("meth",word_chisq("meth",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("amphetamines",word_chisq("amphetamines",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("ketamine",word_chisq("ketamine",data=ldata, n=250, minwords=25),jsonize=True)
+	curate(["datura","brugmansia"],word_chisq(("datura","brugmansia"),data=ldata, n=250, minwords=25),jsonize=True)	
+	curate("2cb",word_chisq("2cb",data=ldata, n=250, minwords=25),jsonize=True)	
+	curate("kratom",word_chisq("kratom",data=ldata, n=250, minwords=25),jsonize=True)	
 
-create_file("trainwrecks", word_chisq("Train Wrecks & Trip Disasters",data=bdata, n=250,stops=False), binary=True) 
-create_file("badtrips", word_chisq("Bad Trips",data=bdata, n=250,stops=False), binary=True)
-create_file("mystical", word_chisq("Mystical Experiences",data=bdata, n=250,stops=False), binary=True)
-create_file("glowing", word_chisq("Glowing Experiences",data=bdata, n=250,stops=False), binary=True)
-create_file("difficult", word_chisq("Difficult Experiences",data=bdata, n=250,stops=False), binary=True)
-
-create_file("06lsd", word_chisq("lsd",data=bdata, n=250,maxwords=250), binary=True)
-
+	cloud(word_chisq(("datura","brugmansia"),data=ldata, n=50, minwords=25))
+	cloud(word_chisq(("kratom"),data=ldata, n=50, minwords=25))
 
 10 amphetamines
 11 2-CI
@@ -35,8 +33,28 @@ create_file("06lsd", word_chisq("lsd",data=bdata, n=250,maxwords=250), binary=Tr
 19 5-MEO-DIPT
 
 
-
-word_chisq("lsd",reference=[k for k in substance_count.keys())
+categories:
+	- nootropics and herbs and supplements
+	- stimulants
+	- depressants
+	- entheogens
+	- short-acting entheogens
+	- entactogens
+	- deleriants
+	- dissociatives
+	- tobacco
+	- alcohol
+	- cannaboids
+	- PIHKAL
+	- TIHKAL
+	- natural
+	- synthetic
+	- short-acting
+	- long-acting
+	- opiates
+	- barbiturates
+	- benzodiazepines
+	- medications
 
 
 """
@@ -58,14 +76,78 @@ if __name__ == "__main__":
 	tag_index = pickle.load(open(path+"data/pickle/tag_index.p","rb"))
 	substance_count = pickle.load(open(path+"data/pickle/substance_count.p","rb"))
 	tag_count = pickle.load(open(path+"data/pickle/tag_count.p","rb"))
-	with open(path+"data/customstops.json","rb") as f:
-		customstops = json.loads(f.read())
 	all_tags = sorted(tag_count.keys() + substance_count.keys())
+	subs50 = dict([(key,substance_count[key]) for key in substance_count if substance_count[key]>=50])
+	subs100 = dict([(key,substance_count[key]) for key in substance_count if substance_count[key]>=100])
 	all_index = [tag_index[n] + substance_index[n] for n,row in enumerate(experiences)]
 	vocab = np.array(vectorizer.get_feature_names())
-	with open(path+"data/files/stopwords.txt") as file:
-		substops = set([line.replace("\n","") for line in file.readlines()])
+	with open(path+"data/customstops.json","rb") as f:
+		customstops = json.loads(f.read())
 		
+		
+	def reduce_data(data, minwords=50):
+		#drop rare words
+		freqs = (data > 0).sum(axis=0)
+		mask = []
+		v = []
+		for i in range(data.shape[1]):
+			if freqs[0,i] > minwords:
+				mask.append(i)
+				v.append(vocab[i])
+		cdata = data[:,mask]
+		stops = set()
+		#remove every substance-specific stopword
+		for k in customstops.keys():
+			for word in customstops[k]:
+				stops.add(word)
+		#also remove the names of substances, because some might not have been curated yet
+		for s in substance_count.keys():
+			stops.add(s)
+		bool = [word not in stops for word in v]
+		mask = []
+		v2 = []
+		for i in range(len(bool)):
+			if bool[i]:
+				mask.append(i)
+				v2.append(v[i])
+		cdata = cdata[:,mask]
+		return cdata, v2
+			
+	def summ_subs(data,voc):
+		summs = np.zeros((len(all_tags),len(voc)))
+		for y,tag in enumerate(all_tags):
+			print "working on " + tag
+			mask = []
+			for e, exp in enumerate(all_index):
+				if tag in exp:
+					mask.append(e)
+			tdata = data[mask, :]
+			summ = tdata.mean(axis=0)
+			summs[y] = summ
+		return summs
+	
+	simplified = summ_subs(*reduce_data(ldata))
+	
+	def similarity(data, voc):
+		from sklearn.metrics.pairwise import cosine_similarity
+		sims = cosine_similarity(data)
+		return sims
+		#could do this as a heat map, or a forced graph
+			
+	def word_sims(data=ndata, words=1000):
+		from sklearn.metrics.pairwise import cosine_similarity
+		freqs = bowdata.sum(axis=0)
+		ranking = np.argsort(freqs).tolist()[0][::-1]
+		usewords = vocab[ranking]
+		usewords = usewords[0:words]
+		wdata = data[:,ranking]
+		wdata = wdata.T
+		wdata = wdata[0:words,:]
+		similarities = cosine_similarity(wdata)
+		return similarities, usewords
+		
+		
+	
 	def word_chisq(	key,
 					reference=None,
 					data=ndata,
@@ -77,6 +159,12 @@ if __name__ == "__main__":
 		from sklearn.feature_selection import chi2
 		if type(key) == str:
 				key = [key]
+				
+		if stops == "custom":
+			collect = []
+			for k in key:
+				collect += customstops[k]
+			stops = collect
 
 		if reference == None:
 			refdata = data
@@ -112,62 +200,97 @@ if __name__ == "__main__":
 		return values[0:n]
 		
 		
-	y,n,x = "y","n","x"
-	def curate(key, values, stops = customstops, jsonize=False):
+	y,n,x = "y","n","x"	
+	def curate(keys, values, stops = customstops, jsonize=False):
+		if jsonize:
+			with open(path+"data/customstops.json","rb") as f:
+				customstops = json.loads(f.read())
+		if type(keys) == str:
+			keys = [keys]
 		j = 0
 		for value in values:
 			response = input("Use " + str(value) + "? (" + str(j) + " words so far) (y/n/x)")
 			if response == "n":
-				if key not in stops:
-					stops[key] = []
-				if value[1] not in stops[key]:
-					stops[key].append(value[1])
-					print "Added " + value[1] + " to the custom stopword list entry for " + key + "."
-					j+=1
+				for key in keys:
+					if key not in stops:
+						stops[key] = []
+					if value[1] not in stops[key]:
+						stops[key].append(value[1])
+						print "Added " + value[1] + " to the custom stopword list entry for " + key + "."
+						j+=1
 			elif response == "x":
-				if jsonize:		
-					with open(path+'data/customstops.json', 'w') as outfile:
-						json.dump(stops, outfile)
-						print "Dumped stopwords to file."
-				else:
-					print "Finished adding stopwords"
 				break
-						
-	curate("lsd",word_chisq("lsd",data=ldata, n=250))		
-					
-		
-	y,n,x = "y","n","x"
-	def create_file(key, values, suffix="", filter=True, binary=False, nwords=50): 
-		filename = key+suffix
-		filename+=".txt"
-		
-		print "Building " +  filename + ":"
-		with open(path+"master/output/" + filename,"w") as file:
-			j = 0
-			for value in values:
-				if j!=None and j>nwords:
-					return
-					
-				if filter==True:
-					response = input("Use " + str(value) + "? (" + str(j) + " words so far) (y/n/x)")
-				else:
-					response = "y"
 				
-				if response == "y":	
-					if binary==True:
-						r = int(value[0]/10)
+		if jsonize:		
+			dumpstops(stops=stops)
+		else:
+			print "Finished adding stopwords"
+			
+	def dumpstops(stops=customstops):
+		with open(path+'data/customstops.json', 'w') as outfile:
+			import pprint
+			json.dump(stops, outfile)
+			print "Dumped stopwords to file."
+						
+				
+	def heatmap(rows, columns):
+		cross = False
+		if len(rows)==len(columns):
+			cross = True
+			for n, row in enumerate(rows):
+				if rows[n] != columns[n]:
+					cross = False
+		import matplotlib.pyplot as plt
+		from sklearn.feature_selection import chi2
+		column_labels = columns
+		row_labels = rows
+		data = np.zeros((len(rows),len(columns)))
+		for y,col in enumerate(columns):
+			labels = [(col in row) for row in all_index]
+			mat = np.zeros((len(experiences),len(rows)))
+			for i,exp in enumerate(experiences):
+				for j,row in enumerate(rows):
+					if row in all_index[i]:
+						mat[i,j] = True
 					else:
-						r = int(value[0]/100)
-					for i in range(r):
-						file.write(value[1])
-						file.write(" ")
-					print "Wrote " + str(value[1]) + " " + str(r) + " times."
-					j+=1
-				elif response == "x":
-					print "Finished " + filename + "."
-					return
-				else:
-					continue
+						mat[i,j] = False	
+			chisq, p = chi2(mat, labels)
+			for x,cs in enumerate(chisq):
+				data[x,y] = np.log(cs)
+			print "finished " + col
+		if cross==True:
+			blank = data.min()
+			for y,col in enumerate(columns):
+				for x,row in enumerate(rows):
+					if x <= y:
+						data[x,y] = blank
+		fig, ax = plt.subplots()
+		heatmap = ax.pcolor(data, cmap=plt.cm.Reds)
+		# put the major ticks at the middle of each cell
+		ax.set_xticks(np.arange(data.shape[1])+0.5, minor=False)
+		ax.set_yticks(np.arange(data.shape[0])+0.5, minor=False)
+		# want a more natural, table-like display
+		ax.invert_yaxis()
+		if not cross:
+			ax.xaxis.tick_top()
+		ax.set_xticklabels(column_labels, minor=False, rotation=90)
+		ax.set_yticklabels(row_labels, minor=False)
+		plt.show()
+						
+	heatmap(sorted(tag_count.keys()),sorted(subs100.keys()))
+	heatmap(sorted(subs100.keys()),sorted(subs100.keys()))
+
+	def cloud(results):
+		words = [row[1] for row in results]
+		import webbrowser
+		url = "http://infiniteperplexity.github.io/ineffable/wordclouds.html"
+		param = ",".join(words)
+		webbrowser.open_new(url + "?words=" + param)
+
+	cloud(word_chisq(("datura","brugmansia"),data=ldata, n=50, minwords=25, stops=customstops["datura"]))
+	cloud(word_chisq(("lsd"),data=ldata, n=50, minwords=25, maxwords=250, stops="custom"))
+	cloud(word_chisq(("meth"),data=ldata, n=50, minwords=25, stops="custom"))
+		
 					
 	def examples(word, lst=None, sort=True, n=5):
 		sub, _, _, _, subexps = rowslice(lst)
@@ -217,107 +340,6 @@ if __name__ == "__main__":
 		for rank in ranking:
 			values.append((chisq[rank],all_tags[rank],p[rank]))
 		return values[0:n]
-						
-				
-				
-	def word_mannwhitney(key, data=ndata, vocab=vocab, index=all_index, method="raw", n=10, stops=True):
-		if key in all_tags:
-			labels = [(key in row) for row in index]
-		else:
-			raise ValueError('Not a valid tag or substance')
-			
-		from scipy.stats import mannwhitneyu
-		mannwhit = []
-		for i in range(data.shape[1]):
-			ranks = data[:,i].toarray().argsort(axis=0)[::-1]
-			trues = ranks[np.asarray(labels)==True]
-			falses = ranks[np.asarray(labels)==False]
-			u = mannwhitneyu(trues,falses)[0]
-			p = u/(trues.shape[0]*falses.shape[0])
-			mannwhit.append(p)
-			
-		ranking = np.argsort(mannwhit)[::-1]	
-		values = []
-		for rank in ranking:
-			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-				continue
-			else:
-				values.append((mannwhit[rank],vocab[rank]))
-		return values[0:n]
-		
-	def word_tfidf(key, data=bdata, vocab=vocab, n=10, mindocs=5,stops=True):
-		tf = rowslice(key,data=data)[0].sum(axis=0)
-		idf = 1.0/data.sum(axis=0)
-		tfidf = np.multiply(tf,idf).tolist()[0]
-		ranking = np.argsort(tfidf)[::-1]
-		tflist = tf.tolist()[0]
-		dflist = (1.0/idf).tolist()[0]
-		values = []
-		for rank in ranking:
-			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-				continue
-			#elif tfidf[rank] < 1:
-			elif dflist[rank] > mindocs:
-			#else:
-				values.append((tfidf[rank],vocab[rank],tflist[rank],dflist[rank]))
-	
-		return values[0:n]
-		
-		
-	def sample(data=ndata, rows=1000):
-		shuffle = range(data.shape[0])[0:rows]
-		return data[sorted(shuffle, key=lambda *args: random.random()),:]
-		
-		
-
-		
-		
-	def exclude_words(data=bowdata, lst=[]):
-		from scipy.sparse import csr_matrix, lil_matrix
-		excluded = lil_matrix(data)
-		for i,word in enumerate(vocab):
-			if word in lst:
-				excluded[:,i] = np.zeros((data.shape[0],1))
-		return csr_matrix(excluded)
-		
-	
-	def word_sims(data=ndata, words=1000):
-		from sklearn.metrics.pairwise import cosine_similarity
-		freqs = bowdata.sum(axis=0)
-		ranking = np.argsort(freqs).tolist()[0][::-1]
-		usewords = vocab[ranking]
-		usewords = usewords[0:words]
-		wdata = data[:,ranking]
-		wdata = wdata.T
-		wdata = wdata[0:words,:]
-		similarities = cosine_similarity(wdata)
-		return similarities, usewords
-		
-
-	def top_words(data=bowdata, words=25000):
-		freqs = data.sum(axis=0)
-		ranking = np.argsort(freqs).tolist()[0][::-1]
-		usewords = vocab[ranking]
-		usewords = usewords[0:words]
-		wdata = data[:,ranking]
-		wdata = wdata[:,0:words]
-		return wdata, usewords
-		
-	
-	tdata,usewords = top_words()
-	mw = word_mannwhitney("lsd",data=tdata,vocab=usewords)
-	
-	def exp_sims(data=ndata, words=1000):
-		from sklearn.metrics.pairwise import cosine_similarity
-		freqs = bowdata.sum(axis=0)
-		ranking = np.argsort(freqs).tolist()[0][::-1]
-		usewords = vocab[ranking]
-		usewords = usewords[0:words]
-		wdata = data[:,ranking]
-		wdata = wdata[:,0:words]
-		similarities = cosine_similarity(wdata)
-		return similarities, usewords
-		
 		
 	def cluster(sims):
 		from scipy.cluster.hierarchy import ward, to_tree
@@ -363,149 +385,3 @@ def jsontree(tree, parent, vocb):
 with open(path+"tree.json","wb") as j:
 	import json
 	json.dump(jsontree(t,None,usewords),j)
-	
-
-def word_blend(key, data=bdata, blend=0.5, index=all_index, vocab=vocab, n=10, mindocs=5,stops=True):
-	from sklearn.feature_selection import chi2
-	if key in all_tags:
-		labels = [(key in row) for row in index]
-	else:
-		raise ValueError('Not a valid tag or substance')
-	#calculate chisq
-	chisq, p = chi2(data, labels)
-	#calculate tf-idf
-	
-	squared = np.multiply(chisq,tfidf)
-	root = np.sqrt(squared)
-	ranking = np.argsort(root)[::-1]
-	values = []
-	for rank in ranking:
-		if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-			continue
-		elif dflist[rank] > mindocs:
-			values.append((root[rank],vocab[rank]))
-	
-	return values[0:n]
-
-#doesn't seem to work quite right..."subtract" totally dominates?
-def word_blend(key, data=bdata, p=0.5, index=all_index, vocab=vocab, n=10, mindocs=5,stops=True):
-	group = rowslice(key,data=data)[0]
-	n1 = float(group.shape[0])
-	ingroup = group.sum(axis=0).astype(float)
-	allgroup = data.sum(axis=0).astype(float)
-	n2 = float(data.shape[0])
-	divide = (n2/n1)*np.divide(ingroup,allgroup)
-	subtract = (ingroup/n1) - (allgroup/n2)
-	subtract = np.maximum(np.zeros_like(subtract),subtract)
-	combined = np.zeros_like(divide)
-	for i in range(combined.shape[1]):
-		combined[0,i] = angle_blend(divide[0,i],subtract[0,i],p)
-		
-	combined = combined.tolist()[0]
-	ingroup = ingroup.tolist()[0]
-	ranking = np.argsort(combined)[::-1]
-	values = []
-	for rank in ranking:
-		if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-			continue
-		elif ingroup[rank] > mindocs:
-			values.append((combined[rank],vocab[rank]))
-	
-	return values[0:n]
-	
-
-	
-def angle_blend(x,y,p):
-	import math
-	if p<0 or p>1:
-		print "invalid value"
-		return None
-       
-	a = p*math.pi/2.0
-	b = math.atan2(y,x)
-	if a == b:
-		return math.sqrt(x*x+y*y)
-	elif a > b:
-		return y/math.cos(a)
-	elif a < b:
-		return x/math.sin(a)
-
-
-def word_custom(key, k=0, data=ndata, vocab=vocab, index=all_index, method="raw", n=10, stops=True):
-		from sklearn.feature_selection import chi2
-		if key in all_tags:
-			labels = [(key in row) for row in index]
-		else:
-			raise ValueError('Not a valid tag or substance')
-			
-		
-		for word in vocab:
-			
-		chisq, p = chi2(data, labels)
-		ranking = np.argsort(chisq)[::-1]
-		values = []
-		
-		counts = rowslice(key,data=bdata)[0]
-		freqs = counts.sum(axis=0)
-		
-		for rank in ranking:
-			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-				continue
-			else:
-				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
-		return values[0:n]
-		
-		
-		
-def distinctive(X, y, _k):
-	import scipy
-	from sklearn.utils import (as_float_array, check_array, check_X_y, safe_sqr, safe_mask)
-	from sklearn.preprocessing import LabelBinarizer
-	from scipy.sparse import issparse
-	from sklearn.utils.extmath import norm, safe_sparse_dot
-	# XXX: we might want to do some of the following in logspace instead for
-	# numerical stability.
-	X = check_array(X, accept_sparse='csr')
-	if np.any((X.data if issparse(X) else X) < 0):
-		raise ValueError("Input X must be non-negative.")
-	
-	Y = LabelBinarizer().fit_transform(y)	
-	if Y.shape[1] == 1:
-		Y = np.append(1 - Y, Y, axis=1)
-	
-	observed = safe_sparse_dot(Y.T, X)  # n_classes * n_features
-	
-	feature_count = check_array(X.sum(axis=0))
-	class_prob = check_array(Y.mean(axis=0))
-	expected = np.dot(class_prob.T, feature_count)
-	
-	observed = np.asarray(observed, dtype=np.float64)
-	k = len(observed)
-	chisq = observed
-	chisq -= expected
-	chisq **= 2
-	chisq /= expected**(_k+1)
-	chisq = chisq.sum(axis=0)
-	return chisq, scipy.special.chdtrc(k - 1, chisq)
-	    
-    
-def word_distinct(key, k=1, data=ndata, vocab=vocab, index=all_index, method="raw", n=10, stops=True):
-		from sklearn.feature_selection import chi2
-		if key in all_tags:
-			labels = [(key in row) for row in index]
-		else:
-			raise ValueError('Not a valid tag or substance')
-			
-		chisq, p = distinctive(data, labels,k)
-		ranking = np.argsort(chisq)[::-1]
-		values = []
-		
-		counts = rowslice(key,data=bdata)[0]
-		freqs = counts.sum(axis=0)
-		
-		for rank in ranking:
-			if key in substance_count.keys() and vocab[rank] in substops and stops==True:
-				continue
-			else:
-				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
-		return values[0:n]
