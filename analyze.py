@@ -76,6 +76,11 @@ if __name__ == "__main__":
 	tag_index = pickle.load(open(path+"data/pickle/tag_index.p","rb"))
 	substance_count = pickle.load(open(path+"data/pickle/substance_count.p","rb"))
 	tag_count = pickle.load(open(path+"data/pickle/tag_count.p","rb"))
+	all_count = {}
+	for key in substance_count.keys():
+		all_count[key] = substance_count[key]
+	for key in tag_count.keys():
+		all_count[key] = substance_count[key]
 	all_tags = sorted(tag_count.keys() + substance_count.keys())
 	subs50 = dict([(key,substance_count[key]) for key in substance_count if substance_count[key]>=50])
 	subs100 = dict([(key,substance_count[key]) for key in substance_count if substance_count[key]>=100])
@@ -83,7 +88,6 @@ if __name__ == "__main__":
 	vocab = np.array(vectorizer.get_feature_names())
 	with open(path+"data/customstops.json","rb") as f:
 		customstops = json.loads(f.read())
-		
 		
 	def reduce_data(data, minwords=50):
 		#drop rare words
@@ -113,8 +117,8 @@ if __name__ == "__main__":
 		cdata = cdata[:,mask]
 		return cdata, v2
 			
-	def summ_subs(data,voc):
-		summs = np.zeros((len(all_tags),len(voc)))
+	def summ_subs(data):
+		summs = np.zeros((len(all_tags),data.shape[1]))
 		for y,tag in enumerate(all_tags):
 			print "working on " + tag
 			mask = []
@@ -125,27 +129,52 @@ if __name__ == "__main__":
 			summ = tdata.mean(axis=0)
 			summs[y] = summ
 		return summs
-	
-	simplified = summ_subs(*reduce_data(ldata))
-	
-	def similarity(data, voc):
+		
+	def similarity(data):
 		from sklearn.metrics.pairwise import cosine_similarity
 		sims = cosine_similarity(data)
 		return sims
-		#could do this as a heat map, or a forced graph
-			
-	def word_sims(data=ndata, words=1000):
-		from sklearn.metrics.pairwise import cosine_similarity
-		freqs = bowdata.sum(axis=0)
-		ranking = np.argsort(freqs).tolist()[0][::-1]
-		usewords = vocab[ranking]
-		usewords = usewords[0:words]
-		wdata = data[:,ranking]
-		wdata = wdata.T
-		wdata = wdata[0:words,:]
-		similarities = cosine_similarity(wdata)
-		return similarities, usewords
 		
+	def wardcluster(sims):
+		from scipy.cluster.hierarchy import ward, to_tree
+		r = ward(sims)
+		t = to_tree(r)
+		return r, t
+		
+	def recurse(tree, names):
+		if tree.is_leaf():
+			return names[tree.id]
+		left = tree.get_left()
+		right = tree.get_right()
+		return (recurse(left,names),recurse(right,names))
+		
+	def jsontree(tree, names):
+			node = {}
+			if tree.is_leaf():
+				node["name"] = names[tree.id]
+				node["size"] = all_count[names[tree.id]]*100
+			else:
+				node["name"] = str(tree.id)		
+				left = tree.get_left()
+				right = tree.get_right()
+				node["children"] = [jsontree(left,names),jsontree(right,names)]
+			return node
+			
+	def dumptree(tree,names,file):
+		with open(path+"gh-pages/"+file+".json","wb") as j:
+			import json
+			json.dump(jsontree(tree,names),j)
+			
+if True:
+	reduced, v = reduce_data(ldata)
+	simplified = summ_subs(reduced)
+	similar = similarity(simplified)
+	ward, tree = wardcluster(similar)
+	dumptree(tree,all_tags,"tagtree")
+	
+	
+
+
 		
 	
 	def word_chisq(	key,
@@ -290,7 +319,6 @@ if __name__ == "__main__":
 	cloud(word_chisq(("datura","brugmansia"),data=ldata, n=50, minwords=25, stops=customstops["datura"]))
 	cloud(word_chisq(("lsd"),data=ldata, n=50, minwords=25, maxwords=250, stops="custom"))
 	cloud(word_chisq(("meth"),data=ldata, n=50, minwords=25, stops="custom"))
-		
 					
 	def examples(word, lst=None, sort=True, n=5):
 		sub, _, _, _, subexps = rowslice(lst)
@@ -341,47 +369,3 @@ if __name__ == "__main__":
 			values.append((chisq[rank],all_tags[rank],p[rank]))
 		return values[0:n]
 		
-	def cluster(sims):
-		from scipy.cluster.hierarchy import ward, to_tree
-		r = ward(sims)
-		t = to_tree(r)
-		return r, t
-		
-	
-	def recurse(tree, vocb):
-		if tree.is_leaf():
-			return vocb[tree.id]
-		left = tree.get_left()
-		right = tree.get_right()
-		return (recurse(left,vocb),recurse(right,vocb))
-        
-        		
-	def group_tags(data=bowdata):
-		groups = np.zeros((0,data.shape[1]))
-		for tag in all_tags:
-			bools = [tag in row for row in all_index]
-			row = data[np.asarray(bools),:].sum(axis=0)
-			groups = np.vstack((groups,row))
-		return groups
-		
-		
-w, usewords = word_sims()
-c, t = cluster(w)
-r = recurse(t,usewords)
-
-		
-def jsontree(tree, parent, vocb):
-		node = {}
-		if tree.is_leaf():
-			node["name"] = vocb[tree.id]
-		else:
-			node["name"] = str(tree.id)		
-			left = tree.get_left()
-			right = tree.get_right()
-			node["children"] = [jsontree(left,str(tree.id),vocb),jsontree(right,str(tree.id),vocb)]
-		node["parent"] = parent
-		return node
-
-with open(path+"tree.json","wb") as j:
-	import json
-	json.dump(jsontree(t,None,usewords),j)
