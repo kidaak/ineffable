@@ -23,6 +23,7 @@ text {
 <script>
 
 //name, children, size
+function init() {
 
 var diameter = 960,
     format = d3.format(",d");
@@ -59,7 +60,10 @@ d3.json("flare.json", function(error, root) {
 });
 
 d3.select(self.frameElement).style("height", diameter + "px");
+
+}
+
 </script>
 </head>
-<body>
+<body onload="init();">
 </body>

@@ -8,6 +8,8 @@
     <link type="text/css" rel="stylesheet" href="style.css"/>
     <style type="text/css">
 
+function init() {
+	
 path.arc {
   cursor: move;
   fill: #fff;
@@ -32,7 +34,7 @@ path.arc {
 
     </style>
   </head>
-  <body>
+  <body onload="init();">
     <div id="body">
       <div id="footer">
         d3.layout.cluster
@@ -156,6 +158,7 @@ function dot(a, b) {
   return a[0] * b[0] + a[1] * b[1];
 }
 
+}
     </script>
   </body>
 </html>
