@@ -5,12 +5,10 @@
     <script type="text/javascript" src="d3/d3.js"></script>
     <script type="text/javascript" src="d3/d3.layout.js"></script>
     <script type="text/javascript" src="packages.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <link type="text/css" rel="stylesheet" href="style.css"/>
     <style type="text/css">
-
-function init() {
-	
-path.arc {
+    path.arc {
   cursor: move;
   fill: #fff;
 }
@@ -31,20 +29,10 @@ path.arc {
   stroke: #ccc;
   stroke-width: 1.5px;
 }
-
     </style>
-  </head>
-  <body onload="init();">
-    <div id="body">
-      <div id="footer">
-        d3.layout.cluster
-        <div class="hint">
-          drag the ring to rotate
-        </div>
-      </div>
-    </div>
-    <script type="text/javascript">
-
+   <script type="text/javascript">
+function init() {
+	
 var w = 1280,
     h = 800,
     rx = w / 2,
@@ -160,5 +148,15 @@ function dot(a, b) {
 
 }
     </script>
-  </body>
+  </head>
+  <body onload="init();">
+    <div id="body">
+      <div id="footer">
+        d3.layout.cluster
+        <div class="hint">
+          drag the ring to rotate
+        </div>
+      </div>
+    </div>
+    </body>
 </html>
