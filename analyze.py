@@ -61,7 +61,7 @@ categories:
 
 if __name__ == "__main__":
 	path = 'C:/Users/Glenn/Documents/GitHub/ineffable/'
-	import os, re, pickle, bs4, nltk, random, numpy as np, json
+	import os, re, pickle, bs4, nltk, random, numpy as np, scipy as sp, json
 	from sklearn.feature_extraction.text import CountVectorizer
 	from sklearn.preprocessing import normalize
 	vectorizer = pickle.load(open(path+"data/pickle/vectorizer.p","rb"))
@@ -118,8 +118,9 @@ if __name__ == "__main__":
 		return cdata, v2
 			
 	def summ_subs(data):
-		summs = np.zeros((len(all_tags),data.shape[1]))
-		for y,tag in enumerate(all_tags):
+		all_subs = sorted(substance_count.keys())
+		summs = np.zeros((len(all_subs),data.shape[1]))
+		for y,tag in enumerate(all_subs):
 			print "working on " + tag
 			mask = []
 			for e, exp in enumerate(all_index):
@@ -164,14 +165,66 @@ if __name__ == "__main__":
 		with open(path+"gh-pages/"+file+".json","wb") as j:
 			import json
 			json.dump(jsontree(tree,names),j)
+
+			
 			
 if True:
 	reduced, v = reduce_data(ldata)
 	simplified = summ_subs(reduced)
 	similar = similarity(simplified)
-	ward, tree = wardcluster(similar)
-	dumptree(tree,all_tags,"tagtree")
+	from scipy.cluster.hierarchy import ward
+	clusters = ward(similar)
+	subnames = sorted(substance_count.keys())
+	subcounts = [substance_count[key] for key in subnames]
 	
+if True:
+	tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,1.5,np.nan)
+	#tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,np.nan,1000)
+	with open(path+"gh-pages/tagtree.json","wb") as j:
+		import json
+		json.dump(tree,j)
+			
+def jsontree(links, id, names, counts, min_d, min_s):
+	global jsontree_tally
+	if id == 2*clusters.shape[0]:
+		jsontree_tally = 0
+		
+	#if this is a leaf node
+	if id <= links.shape[0]:
+		jsontree_tally+=1
+		return {"name" : names[id], "size" : counts[id]}
+	#otherwise, this is a branch node
+	node = {}
+	#this size variable is actually the number of leaves, not the true size
+	left, right, dist, size = tuple(links[int(id-links.shape[0]-1)])
+	node["d"] = dist
+	#if we prune at this step, flatten the remaining branches
+	if dist < min_d or size < min_s: #wait a second...the min size thing does not actually work
+		jsontree_tally+=1
+		nodes = flatjson(links, names, id)
+		node["name"] = ",".join(nodes)
+		idx = [names.index(n) for n in nodes]
+		node["size"] = sum([counts[i] for i in idx])
+	#otherwise, recurse down the branches
+	else:		
+		node["name"] = str(int(id))
+		node["children"] = [jsontree(links, int(left), names, counts, min_d, min_s),jsontree(links, int(right), names, counts, min_d, min_s)]
+	
+	if id == 2*clusters.shape[0]:
+		print "created a total of " + str(jsontree_tally) + " clusters."
+	return node
+
+	
+def flatjson(links, names, id):
+	#if this is a leaf node, return the name in a list
+	if id <= links.shape[0]:
+		return [names[int(id)]]
+	#otherwise, return the concatenation of two lists
+	left, right, dist, size = tuple(links[int(id-links.shape[0]-1)])
+	list1 = flatjson(links, names, left)
+	list2 = flatjson(links, names, right)
+	#does this always fully flatten the list?
+	return list1 + list2
 	
 
 
