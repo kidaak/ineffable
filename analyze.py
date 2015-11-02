@@ -88,6 +88,10 @@ if __name__ == "__main__":
 	vocab = np.array(vectorizer.get_feature_names())
 	with open(path+"data/customstops.json","rb") as f:
 		customstops = json.loads(f.read())
+	with open(path+"/master/ENGSTOP.csv",'rb') as csvfile:
+		import csv
+		reader = csv.reader(csvfile)
+		extrastops = [row[0].replace("'","") for row in reader][1:]
 		
 	def reduce_data(data, minwords=50):
 		#drop rare words
@@ -116,6 +120,19 @@ if __name__ == "__main__":
 				v2.append(v[i])
 		cdata = cdata[:,mask]
 		return cdata, v2
+		
+if True:
+	import gensim
+	reduced, v = reduce_data(bowdata)
+	corpus = gensim.matutils.Sparse2Corpus(reduced.T)
+	tfidf = gensim.models.TfidfModel(corpus)
+	corpus_tfidf = tfidf[corpus]
+	dv = dict([(k,vc) for k,vc in enumerate(v)])
+	lda = gensim.models.LdaModel(corpus_tfidf, id2word = dv, num_topics = 25)
+	corpus_lda= lda[corpus_tfidf]
+	lda.print_topics()
+	
+	
 			
 	def summ_subs(data):
 		all_subs = sorted(substance_count.keys())

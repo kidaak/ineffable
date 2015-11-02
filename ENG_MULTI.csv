@@ -1,0 +1,400 @@
+Term,Role,numdocs
+a bit,Adv,8
+a fortiori,Adv,18
+a lot,Adv,89
+a lot of,Adj,47
+a posteriori,Adj,40
+a posteriori,Adv,64
+a priori,Adj,24
+a priori,Adv,51
+according to,Prep,5385
+ad hoc,Adj,446
+ad interim,Adv,9
+ahead of,Prep,107
+all the time,Adv,20
+along with,Prep,319
+any moment,Adv,56
+any second,Adv,2
+apart from,Prep,567
+as a result of,Prep,2190
+as a rule,Adv,192
+as far as,Conj,560
+as far as,Prep,1377
+as for,Prep,507
+as if,Conj,216
+as in,Prep,795
+as long as,Conj,634
+as many as,Adv,25
+as of,Prep,638
+as one,Adv,517
+as per,Prep,87
+as regards,Prep,6167
+as soon as,Conj,2116
+as though,Conj,31
+as to,Prep,2560
+as well,Adv,379
+as well as,Conj,4490
+as yet,Adv,113
+aside from,Prep,18
+assuming that,Conj,78
+at all,Adv,1293
+at any rate,Adv,34
+at least one,Adj,1427
+at once,Adv,55
+at the expense of,Prep,163
+at variance with,Prep,22
+away from,Prep,262
+back of,Prep,104
+bear up,Verb,6
+because of,Prep,1502
+best known,Adj,8
+black and white,Adj,50
+bona fide,Adj,41
+break up,Verb,12
+bring about,Verb,291
+bring up,Verb,15
+build up,Verb,145
+but for,Prep,149
+by dint of,Prep,8
+by itself,Adv,101
+by means of,Prep,2404
+by proxy,Adv,5
+by reason of,Prep,709
+by the way,Adv,16
+by virtue of,Prep,1069
+by way of,Prep,2127
+carry on,Verb,132
+carry out,Verb,2635
+carry through,Verb,13
+catch on,Verb,19
+central african,Adj,8
+clean up,Verb,10
+clear up,Verb,2
+close by,Adv,10
+close to,Adv,547
+come about,Verb,6
+come in,Verb,31
+come on,Verb,11
+considering that,Conj,225
+costa rican,Adj,3
+cover up,Verb,26
+cut off,Verb,51
+dare to,Aux,2
+dark blue,Adj,7
+de facto,Adj,87
+de facto,Adv,123
+de jure,Adj,21
+de jure,Adv,35
+devoid of,Prep,27
+draw down,Verb,2
+due to,Prep,2584
+east german,Adj,2
+edge in,Verb,7
+egg on,Verb,2
+en bloc,Adv,7
+en masse,Adv,2
+en route,Adv,67
+et al.,Abbr,71
+et cetera,Adv,9
+even if,Conj,1021
+even though,Conj,438
+ever expanding,Adj,2
+ex officio,Adj,14
+ex officio,Adv,32
+ex parte,Adj,3
+ex parte,Adv,2
+except for,Prep,1201
+exclusive of,Prep,66
+fall away,Verb,2
+fall back,Verb,21
+fill in,Verb,73
+filled up,Adj,7
+find out,Verb,65
+fine tune,Verb,2
+fit in,Verb,21
+for all that,Conj,4
+for sake of,Prep,2
+for the sake of,Prep,301
+for want of,Prep,14
+give away,Verb,3
+give in,Verb,7
+give up,Verb,33
+given that,Conj,828
+go ahead,Verb,22
+granting that,Conj,5
+great deal,Adv,46
+grow up,Verb,3
+hand out,Verb,2
+hand over,Verb,25
+high income,Adj,7
+high quality,Adj,442
+hold back,Verb,41
+hold up,Verb,8
+hoped for,Adj,6
+how many,Pron,64
+how much,Pron,69
+in absentia,Adv,12
+in accordance with,Prep,14620
+in addition,Adv,2629
+in addition to,Prep,2055
+in aid of,Prep,3
+in case,Conj,443
+in case of,Prep,1175
+in charge of,Prep,341
+in common with,Prep,57
+in comparison with,Prep,206
+in compliance with,Prep,1068
+in conformity with,Prep,1462
+in consequence of,Prep,48
+in contact with,Prep,230
+in exchange for,Prep,64
+in favour of,Prep,810
+in front,Adv,18
+in front of,Prep,105
+in general,Adv,1221
+in heat,Adv,4
+in lieu of,Prep,67
+in light of,Prep,242
+in line with,Prep,1984
+in need of,Prep,106
+in order for,Conj,301
+in order that,Conj,334
+in particular,Adv,18416
+in place of,Prep,329
+in position,Adv,60
+in process of,Prep,5
+in pursuit,Adv,75
+in re,Prep,2
+in reference to,Prep,21
+in regard to,Prep,218
+in relation to,Prep,3122
+in respect of,Prep,6422
+in respect to,Prep,72
+in return of,Prep,3
+in search of,Prep,8
+in situ,Adj,38
+in situ,Adv,63
+in spite of,Prep,190
+in that,Conj,3907
+in the event that,Conj,476
+in the face of,Prep,100
+in the interim,Adv,24
+in the interval,Adv,22
+in the light of,Prep,2985
+in the process of,Prep,358
+in the raw,Adv,64
+in use,Adv,344
+in vacuo,Adv,9
+in view of,Prep,2309
+in vitro,Adj,64
+in vitro,Adv,58
+inasmuch as,Conj,118
+inside of,Prep,47
+insofar as,Conj,683
+insofar that,Conj,4
+instead of,Prep,791
+inter alia,Adv,2019
+ipso facto,Adv,39
+irrespective of,Prep,914
+just about,Adv,4
+keep in mind,Verb,3
+keep out,Verb,8
+keep up,Verb,62
+kick off,Verb,2
+laid back,Adj,4
+large scale,Adj,98
+latin american,Adj,36
+lay out,Verb,6
+lead on,Verb,5
+lead to,Verb,1793
+leave out,Verb,5
+light up,Verb,8
+line up,Verb,3
+lock up,Verb,2
+long time,Adj,120
+look forward to,Verb,14
+look out,Verb,2
+low income,Adj,16
+low level,Adj,225
+lower than,Prep,1005
+make out,Verb,28
+make up,Verb,237
+market driven,Adj,11
+mentally ill,Adj,10
+mix up,Verb,2
+mixed up,Adj,2
+more or less,Adv,130
+most often,Adj,25
+most remote,Adj,16
+move along,Verb,7
+must do,Adj,68
+near to,Prep,62
+need to,Aux,3360
+needs to,Aux,1197
+netherlands antillean,Adj,1
+next day,Adj,14
+next to,Prep,67
+no one,Pron,50
+north american,Adj,23
+north korean,Adj,2
+northern irish,Adj,2
+not as good,Adj,3
+not for profit,Adj,3
+not many,Adj,3
+not quite,Adv,9
+now and then,Adv,2
+now that,Conj,59
+null and void,Adj,77
+number one,Adj,5
+of late,Adj,34
+off of,Prep,19
+off the shelf,Adj,2
+old fashioned,Adj,2
+on account of,Prep,447
+on all sides,Adv,14
+on behalf of,Prep,2461
+on grounds of,Prep,375
+on hold,Adv,4
+on pain of,Prep,8
+on the grounds of,Prep,277
+on the matter of,Prep,6
+on the part of,Prep,527
+on the strength of,Prep,21
+on time,Adv,72
+on to,Prep,472
+on top of,Prep,106
+once more,Adv,65
+one more,Adv,26
+op cit.,Abbr,3
+ought to,Aux,124
+out of,Prep,1373
+out of control,Adj,5
+out of work,Adj,6
+outside of,Prep,194
+owing to,Prep,570
+paper based,Adj,3
+par excellence,Adj,2
+par excellence,Adv,5
+pari passu,Adj,20
+pay up,Verb,4
+per annum,Adv,142
+per capita,Adj,95
+per capita,Adv,85
+per diem,Adj,13
+per diem,Adv,2
+per se,Adv,83
+pick up,Verb,47
+play down,Verb,2
+point out,Verb,165
+preliminary to,Prep,11
+preparatory to,Prep,22
+previous to,Prep,20
+prima facie,Adj,105
+prima facie,Adv,60
+prior to,Prep,2112
+pro forma,Adj,26
+pro forma,Adv,5
+pro rata,Adv,243
+provided that,Conj,3567
+providing that,Conj,200
+pursuant to,Prep,8208
+put by,Verb,14
+put down,Verb,12
+put forth,Verb,2
+put off,Verb,7
+put on,Verb,275
+put out,Verb,75
+put up,Verb,363
+regardless of,Prep,603
+relative to,Prep,328
+round up,Verb,13
+saudi arabian,Adj,7
+save that,Conj,13
+second class,Adj,6
+second level,Adj,24
+seeing that,Conj,13
+set at,Verb,1156
+set back,Verb,3
+set off,Verb,60
+set on,Verb,68
+set out,Verb,8830
+set up,Verb,2793
+show up,Verb,7
+side by side,Adj,3
+side by side,Adv,31
+sign up,Verb,11
+sine die,Adv,2
+single out,Verb,8
+so as,Conj,2113
+so long,Interj,155
+so that,Conj,2238
+soak up,Verb,2
+sought after,Adj,12
+south african,Adj,307
+south american,Adj,20
+south korean,Adj,3
+southeast asian,Adj,3
+spell out,Verb,37
+sri lankan,Adj,4
+stamp out,Verb,5
+stand out,Verb,25
+stand up,Verb,13
+stemming from,Prep,176
+step up,Verb,208
+sub judice,Adv,3
+subsequent to,Prep,266
+such as,Prep,4068
+such that,Conj,835
+sui generis,Adj,18
+take advantage,Verb,188
+take away,Verb,6
+take in,Verb,102
+take off,Verb,17
+take on,Verb,184
+take out,Verb,58
+take over,Verb,184
+take place,Verb,1676
+take up,Verb,256
+thank you,Interj,10
+thanks to,Prep,191
+third degree,Adj,2
+third party,Adj,472
+tie up,Verb,2
+tip over,Verb,2
+to a degree,Adv,49
+to the point,Adj,106
+together with,Prep,2810
+too soon,Adv,6
+turn down,Verb,2
+turn in,Verb,7
+turn on,Verb,11
+turn out,Verb,23
+turn over,Verb,12
+turned on,Adj,20
+ultra vires,Adv,2
+under way,Adv,227
+up against,Prep,14
+up to,Prep,3111
+upside down,Adv,4
+upwards of,Prep,4
+use up,Verb,20
+used to,Aux,2133
+vice versa,Adv,172
+ward off,Verb,4
+warm blooded,Adj,1
+waste away,Verb,2
+wear out,Verb,3
+well known,Adj,73
+wind up,Verb,16
+wipe out,Verb,4
+with reference to,Prep,383
+with regard to,Prep,4255
+with respect to,Prep,1734
+with the exception of,Prep,1962
+within reach,Adj,21
+without doubt,Adj,13
+work out,Verb,42
+wrapped up,Adj,2
+write down,Verb,5
+zero in,Verb,19
+"  la",Prep,122
