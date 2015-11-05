@@ -133,6 +133,10 @@ if True:
 	lda = gensim.models.LdaModel(corpus_tfidf, id2word = dv, num_topics = 25)
 	corpus_lda= lda[corpus_tfidf]
 	lda.print_topics()
+	hdp = gensim.models.HdpModel(corpus_tfidf, id2word = dv)
+	corpus_hdp = hdp[corpus_tfidf]
+	hdp.print_topics()
+	#some way of seeding this?
 	
 	
 			
