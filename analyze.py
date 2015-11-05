@@ -60,7 +60,8 @@ categories:
 """
 
 if __name__ == "__main__":
-	path = 'C:/Users/Glenn/Documents/GitHub/ineffable/'
+	#path = 'C:/Users/Glenn/Documents/GitHub/ineffable/'
+	path = 'C:/Users/Glenn Wright/Documents/GitHub/ineffable/'
 	import os, re, pickle, bs4, nltk, random, numpy as np, scipy as sp, json
 	from sklearn.feature_extraction.text import CountVectorizer
 	from sklearn.preprocessing import normalize
@@ -92,6 +93,7 @@ if __name__ == "__main__":
 		import csv
 		reader = csv.reader(csvfile)
 		extrastops = [row[0].replace("'","") for row in reader][1:]
+	wordcounts = dict([(vocab[i],n) for i,n in enumerate(bowdata.sum(axis=0).tolist()[0])])
 		
 	def reduce_data(data, minwords=50):
 		#drop rare words
@@ -152,36 +154,7 @@ if True:
 		from sklearn.metrics.pairwise import cosine_similarity
 		sims = cosine_similarity(data)
 		return sims
-		
-	def wardcluster(sims):
-		from scipy.cluster.hierarchy import ward, to_tree
-		r = ward(sims)
-		t = to_tree(r)
-		return r, t
-		
-	def recurse(tree, names):
-		if tree.is_leaf():
-			return names[tree.id]
-		left = tree.get_left()
-		right = tree.get_right()
-		return (recurse(left,names),recurse(right,names))
-		
-	def jsontree(tree, names):
-			node = {}
-			if tree.is_leaf():
-				node["name"] = names[tree.id]
-				node["size"] = all_count[names[tree.id]]*100
-			else:
-				node["name"] = str(tree.id)		
-				left = tree.get_left()
-				right = tree.get_right()
-				node["children"] = [jsontree(left,names),jsontree(right,names)]
-			return node
-			
-	def dumptree(tree,names,file):
-		with open(path+"gh-pages/"+file+".json","wb") as j:
-			import json
-			json.dump(jsontree(tree,names),j)
+
 
 			
 			
@@ -200,6 +173,17 @@ if True:
 	with open(path+"gh-pages/tagtree.json","wb") as j:
 		import json
 		json.dump(tree,j)
+		
+if True:
+	reduced, v = reduce_data(ldata)
+	similar = similarity(simplified.T)
+	from scipy.cluster.hierarchy import ward
+	clusters = ward(similar)
+	w = reduced.sum(axis=0).tolist()[0]
+	wordtree = jsontree(clusters,2*clusters.shape[0],v,w,1.5,np.nan)
+	with open(path+"gh-pages/wordtree.json","wb") as j:
+		import json
+		json.dump(wordtree,j)
 			
 def jsontree(links, id, names, counts, min_d, min_s):
 	global jsontree_tally
