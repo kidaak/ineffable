@@ -8,15 +8,15 @@ curate("cannabis",word_chisq("cannabis",data=ldata, n=250),jsonize=True)
 	curate("lsd",word_chisq("lsd",data=ldata, n=250),jsonize=True)
 	curate("dxm",word_chisq("dxm",data=ldata, n=250, minwords=25),jsonize=True)
 	curate("tobacco",word_chisq("tobacco",data=ldata, n=250, minwords=25),jsonize=True)
-	curate("cocaine",word_chisq("cocaine",data=ldata, n=250),jsonize=True)	
+	curate("cocaine",word_chisq("cocaine",data=ldata, n=250),jsonize=True)
 	curate("nitrous",word_chisq("nitrous",data=ldata, n=250, minwords=25),jsonize=True)
 	curate("dmt",word_chisq("dmt",data=ldata, n=250, minwords=25),jsonize=True)
 	curate("meth",word_chisq("meth",data=ldata, n=250, minwords=25),jsonize=True)
 	curate("amphetamines",word_chisq("amphetamines",data=ldata, n=250, minwords=25),jsonize=True)
 	curate("ketamine",word_chisq("ketamine",data=ldata, n=250, minwords=25),jsonize=True)
-	curate(["datura","brugmansia"],word_chisq(("datura","brugmansia"),data=ldata, n=250, minwords=25),jsonize=True)	
-	curate("2cb",word_chisq("2cb",data=ldata, n=250, minwords=25),jsonize=True)	
-	curate("kratom",word_chisq("kratom",data=ldata, n=250, minwords=25),jsonize=True)	
+	curate(["datura","brugmansia"],word_chisq(("datura","brugmansia"),data=ldata, n=250, minwords=25),jsonize=True)
+	curate("2cb",word_chisq("2cb",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("kratom",word_chisq("kratom",data=ldata, n=250, minwords=25),jsonize=True)
 
 	cloud(word_chisq(("datura","brugmansia"),data=ldata, n=50, minwords=25))
 	cloud(word_chisq(("kratom"),data=ldata, n=50, minwords=25))
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 		reader = csv.reader(csvfile)
 		extrastops = [row[0].replace("'","") for row in reader][1:]
 	wordcounts = dict([(vocab[i],n) for i,n in enumerate(bowdata.sum(axis=0).tolist()[0])])
-		
+
 	def reduce_data(data, minwords=50):
 		#drop rare words
 		freqs = (data > 0).sum(axis=0)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 				v2.append(v[i])
 		cdata = cdata[:,mask]
 		return cdata, v2
-		
+
 if True:
 	import gensim
 	reduced, v = reduce_data(bowdata)
@@ -137,9 +137,27 @@ if True:
 	corpus_hdp = hdp[corpus_tfidf]
 	hdp.print_topics()
 	#some way of seeding this?
-	
-	
-			
+
+#this might work for seeded LDA
+if True:
+	seedterms = {
+		"seedterm1" : ["addict","addiction","problem"],
+		"seedterm2" : ["psychedelic","fractal","visual"]
+	}
+	seedvocab = vocab + seedterms.keys()
+	newcols = np.zeros((bowdata.shape[0],len(seedterms.keys())))
+	for n, row in enumerate(bowdata):
+		for m,term in enumerate(seedterms.keys()):
+				found = False
+				for word in seedterms[term]:
+					if bowdata[n, vocab.index(word)] > 0:
+						found = True
+				if found:
+					newcols[n,m] = 1
+	xdata = np.concatenate((bowdata,newcols),axis=1)
+
+
+
 	def summ_subs(data):
 		all_subs = sorted(substance_count.keys())
 		summs = np.zeros((len(all_subs),data.shape[1]))
@@ -153,15 +171,15 @@ if True:
 			summ = tdata.mean(axis=0)
 			summs[y] = summ
 		return summs
-		
+
 	def similarity(data):
 		from sklearn.metrics.pairwise import cosine_similarity
 		sims = cosine_similarity(data)
 		return sims
 
 
-			
-			
+
+
 if True:
 	reduced, v = reduce_data(ldata)
 	simplified = summ_subs(reduced)
@@ -170,14 +188,14 @@ if True:
 	clusters = ward(similar)
 	subnames = sorted(substance_count.keys())
 	subcounts = [substance_count[key] for key in subnames]
-	
+
 if True:
 	tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,1.5,np.nan)
 	#tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,np.nan,1000)
 	with open(path+"gh-pages/tagtree.json","wb") as j:
 		import json
 		json.dump(tree,j)
-		
+
 if True:
 	reduced, v = reduce_data(ldata)
 	similar = similarity(simplified.T)
@@ -188,12 +206,12 @@ if True:
 	with open(path+"gh-pages/wordtree.json","wb") as j:
 		import json
 		json.dump(wordtree,j)
-			
+
 def jsontree(links, id, names, counts, min_d, min_s):
 	global jsontree_tally
 	if id == 2*clusters.shape[0]:
 		jsontree_tally = 0
-		
+
 	#if this is a leaf node
 	if id <= links.shape[0]:
 		jsontree_tally+=1
@@ -211,15 +229,15 @@ def jsontree(links, id, names, counts, min_d, min_s):
 		idx = [names.index(n) for n in nodes]
 		node["size"] = sum([counts[i] for i in idx])
 	#otherwise, recurse down the branches
-	else:		
+	else:
 		node["name"] = str(int(id))
 		node["children"] = [jsontree(links, int(left), names, counts, min_d, min_s),jsontree(links, int(right), names, counts, min_d, min_s)]
-	
+
 	if id == 2*clusters.shape[0]:
 		print "created a total of " + str(jsontree_tally) + " clusters."
 	return node
 
-	
+
 def flatjson(links, names, id):
 	#if this is a leaf node, return the name in a list
 	if id <= links.shape[0]:
@@ -230,11 +248,11 @@ def flatjson(links, names, id):
 	list2 = flatjson(links, names, right)
 	#does this always fully flatten the list?
 	return list1 + list2
-	
 
 
-		
-	
+
+
+
 	def word_chisq(	key,
 					reference=None,
 					data=ndata,
@@ -246,7 +264,7 @@ def flatjson(links, names, id):
 		from sklearn.feature_selection import chi2
 		if type(key) == str:
 				key = [key]
-				
+
 		if stops == "custom":
 			collect = []
 			for k in key:
@@ -260,7 +278,7 @@ def flatjson(links, names, id):
 		else:
 			if type(reference) == str:
 				reference = [reference]
-				
+
 			refs = [(True in [(k in row) for k in reference]) for row in all_index]
 			refs = np.array(refs)
 			refdata = data[refs,:]
@@ -274,20 +292,20 @@ def flatjson(links, names, id):
 		ranking = np.argsort(chisq)[::-1]
 		values = []
 		freqs = (refdata > 0)[labels,:].sum(axis=0)
-		
+
 		i = 0
 		for rank in ranking:
 			if i >= n:
 				break
-				
+
 			if not np.isnan(chisq[rank]) and not freqs[:,rank]<minwords and not freqs[:,rank]>maxwords and vocab[rank] not in stops:
 				values.append((chisq[rank],vocab[rank],p[rank],freqs[:,rank][0,0]))
 				i+=1
-				
+
 		return values[0:n]
-		
-		
-	y,n,x = "y","n","x"	
+
+
+	y,n,x = "y","n","x"
 	def curate(keys, values, stops = customstops, jsonize=False):
 		if jsonize:
 			with open(path+"data/customstops.json","rb") as f:
@@ -307,19 +325,19 @@ def flatjson(links, names, id):
 						j+=1
 			elif response == "x":
 				break
-				
-		if jsonize:		
+
+		if jsonize:
 			dumpstops(stops=stops)
 		else:
 			print "Finished adding stopwords"
-			
+
 	def dumpstops(stops=customstops):
 		with open(path+'data/customstops.json', 'w') as outfile:
 			import pprint
 			json.dump(stops, outfile)
 			print "Dumped stopwords to file."
-						
-				
+
+
 	def heatmap(rows, columns):
 		cross = False
 		if len(rows)==len(columns):
@@ -340,7 +358,7 @@ def flatjson(links, names, id):
 					if row in all_index[i]:
 						mat[i,j] = True
 					else:
-						mat[i,j] = False	
+						mat[i,j] = False
 			chisq, p = chi2(mat, labels)
 			for x,cs in enumerate(chisq):
 				data[x,y] = np.log(cs)
@@ -363,7 +381,7 @@ def flatjson(links, names, id):
 		ax.set_xticklabels(column_labels, minor=False, rotation=90)
 		ax.set_yticklabels(row_labels, minor=False)
 		plt.show()
-						
+
 	heatmap(sorted(tag_count.keys()),sorted(subs100.keys()))
 	heatmap(sorted(subs100.keys()),sorted(subs100.keys()))
 
@@ -377,7 +395,7 @@ def flatjson(links, names, id):
 	cloud(word_chisq(("datura","brugmansia"),data=ldata, n=50, minwords=25, stops=customstops["datura"]))
 	cloud(word_chisq(("lsd"),data=ldata, n=50, minwords=25, maxwords=250, stops="custom"))
 	cloud(word_chisq(("meth"),data=ldata, n=50, minwords=25, stops="custom"))
-					
+
 	def examples(word, lst=None, sort=True, n=5):
 		sub, _, _, _, subexps = rowslice(lst)
 		wdata = sub[:,vocab==word].toarray()
@@ -386,32 +404,32 @@ def flatjson(links, names, id):
 		for rank in ranking:
 			if wdata[rank,0] > 0:
 				exps.append(subexps[rank])
-				
+
 		if sort==False:
 			exps = sorted(exps, key=lambda *args: random.random())
-			
+
 		return exps[0:n]
-		
+
 	def read_examples(word, lst=None, sort=True, n=5):
 		files = examples(word, lst, sort, n)
 		print "Word occurs in " + str(len(files)) + " files. (note this is wrong!)"
 		for name in files:
 			dummy = raw_input("*************Next report?**************")
-			with open(path+"data/xml/"+name) as f:	
+			with open(path+"data/xml/"+name) as f:
 				txt = f.read()
 				txt = txt.replace("*","")
 				txt = txt.replace(word,"***"+word+"***")
 				txt = txt.replace(word.capitalize(),"***"+word.capitalize()+"***")
 				print txt
-		
-		
+
+
 	def tag_chisq(key, n=10):
 		from sklearn.feature_selection import chi2
 		if key in all_tags:
 			labels = [(key in row) for row in all_index]
 		else:
 			raise ValueError('Not a valid tag or substance')
-			
+
 		mat = np.zeros((len(experiences),len(all_tags)))
 		for i,row in enumerate(experiences):
 			for j,tag in enumerate(all_tags):
@@ -419,11 +437,10 @@ def flatjson(links, names, id):
 					mat[i,j] = True
 				else:
 					mat[i,j] = False
-			
+
 		chisq, p = chi2(mat, labels)
 		ranking = np.argsort(chisq)[::-1]
 		values = []
 		for rank in ranking:
 			values.append((chisq[rank],all_tags[rank],p[rank]))
 		return values[0:n]
-		
