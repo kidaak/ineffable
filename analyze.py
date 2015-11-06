@@ -138,9 +138,9 @@ if True:
     lda_data = gensim.matutils.corpus2csc(corpus_lda).T
 	topdocs = {}
    	for m,topic in enumerate(lda.print_topics()):
-    	top = np.argmax(lda_data[:,m].toarray())
-    	topdocs[topic] = experiences[top]
-           
+        top = np.argmax(lda_data[:,m].toarray())
+        topdocs[topic] = experiences[top]
+
 
 	hdp = gensim.models.HdpModel(corpus_tfidf, id2word = dv)
 	corpus_hdp = hdp[corpus_tfidf]
@@ -220,7 +220,6 @@ def jsontree(links, id, names, counts, min_d, min_s):
 	global jsontree_tally
 	if id == 2*clusters.shape[0]:
 		jsontree_tally = 0
-
 	#if this is a leaf node
 	if id <= links.shape[0]:
 		jsontree_tally+=1
@@ -234,18 +233,19 @@ def jsontree(links, id, names, counts, min_d, min_s):
 	if dist < min_d or size < min_s: #wait a second...the min size thing does not actually work
 		jsontree_tally+=1
 		nodes = flatjson(links, names, id)
-		node["name"] = ",".join(nodes)
-		idx = [names.index(n) for n in nodes]
-		node["size"] = sum([counts[i] for i in idx])
+		#try array children instead of strings
+		node["name"] = str(int(id))
+		children = [{"name": node, "size": counts[names.index[node]]} for node in nodes]
+		#node["name"] = ",".join(nodes)
+		#idx = [names.index(n) for n in nodes]
+		#node["size"] = sum([counts[i] for i in idx])
 	#otherwise, recurse down the branches
 	else:
 		node["name"] = str(int(id))
 		node["children"] = [jsontree(links, int(left), names, counts, min_d, min_s),jsontree(links, int(right), names, counts, min_d, min_s)]
-
 	if id == 2*clusters.shape[0]:
 		print "created a total of " + str(jsontree_tally) + " clusters."
 	return node
-
 
 def flatjson(links, names, id):
 	#if this is a leaf node, return the name in a list
@@ -257,6 +257,8 @@ def flatjson(links, names, id):
 	list2 = flatjson(links, names, right)
 	#does this always fully flatten the list?
 	return list1 + list2
+
+
 
 
 
