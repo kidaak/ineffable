@@ -130,9 +130,18 @@ if True:
 	tfidf = gensim.models.TfidfModel(corpus)
 	corpus_tfidf = tfidf[corpus]
 	dv = dict([(k,vc) for k,vc in enumerate(v)])
+ 	#passes=2, iterations=100?
 	lda = gensim.models.LdaModel(corpus_tfidf, id2word = dv, num_topics = 25)
 	corpus_lda= lda[corpus_tfidf]
 	lda.print_topics()
+
+    lda_data = gensim.matutils.corpus2csc(corpus_lda).T
+	topdocs = {}
+   	for m,topic in enumerate(lda.print_topics()):
+    	top = np.argmax(lda_data[:,m].toarray())
+    	topdocs[topic] = experiences[top]
+           
+
 	hdp = gensim.models.HdpModel(corpus_tfidf, id2word = dv)
 	corpus_hdp = hdp[corpus_tfidf]
 	hdp.print_topics()
