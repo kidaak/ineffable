@@ -190,7 +190,7 @@ if True:
 
 
 if True:
-	reduced, v = reduce_data(ldata)
+	reduced, v = reduce_data(bdata)
 	simplified = summ_subs(reduced)
 	similar = similarity(simplified)
 	from scipy.cluster.hierarchy import ward
@@ -199,7 +199,7 @@ if True:
 	subcounts = [substance_count[key] for key in subnames]
 
 if True:
-	tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,1.5,np.nan)
+	tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,1,np.nan)
 	#tree = jsontree(clusters,2*clusters.shape[0],subnames,subcounts,np.nan,1000)
 	with open(path+"gh-pages/tagtree.json","wb") as j:
 		import json
@@ -232,10 +232,10 @@ def jsontree(links, id, names, counts, min_d, min_s):
 	#if we prune at this step, flatten the remaining branches
 	if dist < min_d or size < min_s: #wait a second...the min size thing does not actually work
 		jsontree_tally+=1
-		nodes = flatjson(links, names, id)
+		nodes = flatjson(links, names, counts, id)
 		#try array children instead of strings
 		node["name"] = str(int(id))
-		children = [{"name": node, "size": counts[names.index[node]]} for node in nodes]
+		node['children'] = [{"name": n['name'], "size": counts[names.index(n['name'])]} for n in nodes]
 		#node["name"] = ",".join(nodes)
 		#idx = [names.index(n) for n in nodes]
 		#node["size"] = sum([counts[i] for i in idx])
@@ -247,14 +247,15 @@ def jsontree(links, id, names, counts, min_d, min_s):
 		print "created a total of " + str(jsontree_tally) + " clusters."
 	return node
 
-def flatjson(links, names, id):
+def flatjson(links, names, counts, id):
 	#if this is a leaf node, return the name in a list
 	if id <= links.shape[0]:
-		return [names[int(id)]]
+		return [{'name': names[int(id)], 'size': counts[int(id)]}]
+		#return [names[int(id)]]
 	#otherwise, return the concatenation of two lists
 	left, right, dist, size = tuple(links[int(id-links.shape[0]-1)])
-	list1 = flatjson(links, names, left)
-	list2 = flatjson(links, names, right)
+	list1 = flatjson(links, names, counts, left)
+	list2 = flatjson(links, names, counts, right)
 	#does this always fully flatten the list?
 	return list1 + list2
 
