@@ -131,7 +131,7 @@ if True:
 	corpus_tfidf = tfidf[corpus]
 	dv = dict([(k,vc) for k,vc in enumerate(v)])
  	#passes=2, iterations=100?
-	lda = gensim.models.LdaModel(corpus_tfidf, id2word = dv, num_topics = 25)
+	lda = gensim.models.LdaModel(corpus_tfidf, alpha='auto', id2word = dv, num_topics = 50, iterations=200, passes=2, eta=1.0/len(dv))
 	corpus_lda= lda[corpus_tfidf]
 	lda.print_topics()
 
@@ -141,6 +141,47 @@ if True:
         top = np.argmax(lda_data[:,m].toarray())
         topdocs[topic] = experiences[top]
 
+
+def view_reports(lst):
+	if type(lst)==str:
+		lst = [lst]
+	print type(lst)
+	import webbrowser
+	webbrowser.open_new('file:///'+path+'data/xml/'+lst[0])
+	#webbrowser.open_new('file://'+path+'data/xml/' + lst[0])
+	from time import sleep
+	for item in lst[1:]:
+		sleep(1)
+		webbrowser.open_new_tab('file:///'+path+'data/xml/' + item)
+
+
+
+def top_docs(data, n, ndocs=5):
+	import webbrowser
+	data = data.toarray()
+	t = np.argsort(data[:,n].tolist())
+	exps = [experiences[i] for i in t[-1:-ndocs-1:-1]]
+	return exps
+
+view_repo
+
+
+def prepare_eta(vocab, lst, num_topics=50):
+	et = 1.0/len(vocab)
+	eta = np.linspace(et,et,num_topics*len(vocab))
+	eta = eta.reshape((num_topics, len(vocab)))
+	#apply weights
+	for n,l in enumerate(lst):
+		for word in l:
+			if word in vocab:
+				idx = vocab.index(word)
+				eta[n,idx] = 100.0*et
+			else:
+				print "note: skipped " + word
+	return eta
+
+weights = [["police","handcuff","cop","arrest"],["overdose","narcan","hospital","nurse","ambulance"]]
+eta = prepare_eta(v,weights)
 
 	hdp = gensim.models.HdpModel(corpus_tfidf, id2word = dv)
 	corpus_hdp = hdp[corpus_tfidf]
@@ -211,7 +252,7 @@ if True:
 	from scipy.cluster.hierarchy import ward
 	clusters = ward(similar)
 	w = reduced.sum(axis=0).tolist()[0]
-	wordtree = jsontree(clusters,2*clusters.shape[0],v,w,1.5,np.nan)
+	wordtree = jsontree(clusters,2*clusters.shape[0],v,w,10,np.nan)
 	with open(path+"gh-pages/wordtree.json","wb") as j:
 		import json
 		json.dump(wordtree,j)
@@ -258,8 +299,6 @@ def flatjson(links, names, counts, id):
 	list2 = flatjson(links, names, counts, right)
 	#does this always fully flatten the list?
 	return list1 + list2
-
-
 
 
 
