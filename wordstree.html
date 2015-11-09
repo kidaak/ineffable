@@ -21,7 +21,7 @@
 
 .node {
   font-size: 10px;
-  pointer-events: none;
+/*  pointer-events: none;*/
 }
 
 .link {
@@ -32,9 +32,9 @@
     </style>
    <script type="text/javascript">
 function init() {
-	
-var w = 1280,
-    h = 800,
+
+var w = 1000,
+    h = 1000,
     rx = w / 2,
     ry = h / 2,
     m0,
@@ -77,8 +77,14 @@ d3.json("wordtree.json", function(json) {
       .attr("class", "node")
       .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
 
+    node.append("title")
+              .text(function(d) { return d.name + ": " + d.value + " " + d.size; });
+
+
   node.append("svg:circle")
-      .attr("r", 3);
+      .attr("r", 5);
+
+
 
   node.append("svg:text")
       .attr("dx", function(d) { return d.x < 180 ? 8 : -8; })
@@ -86,6 +92,8 @@ d3.json("wordtree.json", function(json) {
       .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
       .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
       .text(function(d) { return d.name; });
+
+
 });
 
 d3.select(window)
