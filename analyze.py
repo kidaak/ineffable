@@ -17,9 +17,14 @@ curate("cannabis",word_chisq("cannabis",data=ldata, n=250),jsonize=True)
 	curate(["datura","brugmansia"],word_chisq(("datura","brugmansia"),data=ldata, n=250, minwords=25),jsonize=True)
 	curate("2cb",word_chisq("2cb",data=ldata, n=250, minwords=25),jsonize=True)
 	curate("kratom",word_chisq("kratom",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("2ci",word_chisq("2ci",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("syrian_rue",word_chisq("syrian_rue",data=ldata, n=250, minwords=25),jsonize=True)
+	curate("5meo_dmt",word_chisq("5meo_dmt",data=ldata, n=250, minwords=25),jsonize=True)
 
 	cloud(word_chisq(("datura","brugmansia"),data=ldata, n=50, minwords=25))
 	cloud(word_chisq(("kratom"),data=ldata, n=50, minwords=25))
+	cloud(word_chisq(("2ci"),data=ldata, n=50, minwords=25),jsonize=True)
+	cloud(word_chisq(("syrian_rue"),data=ldata, n=50, minwords=25),jsonize=True)
 
 10 amphetamines
 11 2-CI
@@ -32,7 +37,8 @@ curate("cannabis",word_chisq("cannabis",data=ldata, n=250),jsonize=True)
 18 Ketamine
 19 5-MEO-DIPT
 
-
+[u'ketamine', u'lsd', u'nitrous', u'alcohol', u'tobacco', u'mdma', u'amphetamines', u'brugmansia', u'salvia', u'mushrooms',
+ u'cannabis', u'dxm', u'dmt', u'kratom', u'meth', u'2cb', u'datura']
 categories:
 	- nootropics and herbs and supplements
 	- stimulants
@@ -156,15 +162,12 @@ def view_reports(lst):
 
 
 
-def top_docs(data, n, ndocs=5):
+def topic_exemplars(data, n, ndocs=5):
 	import webbrowser
 	data = data.toarray()
 	t = np.argsort(data[:,n].tolist())
 	exps = [experiences[i] for i in t[-1:-ndocs-1:-1]]
 	return exps
-
-view_repo
-
 
 def prepare_eta(vocab, lst, num_topics=50):
 	et = 1.0/len(vocab)
@@ -248,16 +251,17 @@ if True:
 
 if True:
 	reduced, v = reduce_data(ldata)
-	similar = similarity(simplified.T)
+	similar = similarity(reduced.T)
 	from scipy.cluster.hierarchy import ward
 	clusters = ward(similar)
 	w = reduced.sum(axis=0).tolist()[0]
-	wordtree = jsontree(clusters,2*clusters.shape[0],v,w,10,np.nan)
+	wordtree = jsontree(clusters,2*clusters.shape[0],v,w,4,np.nan, flatten="hidden")
 	with open(path+"gh-pages/wordtree.json","wb") as j:
+	#with open(path+"gh-pages/wordtree" + jsontree_tally + ".json","wb") as j:
 		import json
 		json.dump(wordtree,j)
 
-def jsontree(links, id, names, counts, min_d, min_s):
+def jsontree(links, id, names, counts, min_d, min_s,flatten="full"):
 	global jsontree_tally
 	if id == 2*clusters.shape[0]:
 		jsontree_tally = 0
@@ -274,16 +278,35 @@ def jsontree(links, id, names, counts, min_d, min_s):
 	if dist < min_d or size < min_s: #wait a second...the min size thing does not actually work
 		jsontree_tally+=1
 		nodes = flatjson(links, names, counts, id)
-		#try array children instead of strings
-		node["name"] = str(int(id))
-		node['children'] = [{"name": n['name'], "size": counts[names.index(n['name'])]} for n in nodes]
-		#node["name"] = ",".join(nodes)
-		#idx = [names.index(n) for n in nodes]
-		#node["size"] = sum([counts[i] for i in idx])
+		#choose method of representing the aggregated nodes
+		if flatten=="full":
+			#flatten the children but do not prune leaves
+			node["name"] = str(int(id))
+			node['children'] = [{"name": n['name'], "size": counts[names.index(n['name'])]} for n in nodes]
+		elif flatten=="flat":
+			#flatten the hierarchy into a string
+			node["name"] = str([n['name'] for n in nodes])
+			node["size"] = sum([counts[names.index(n['name'])] for n in nodes])
+		elif flatten=="lists":
+			#flatten the children into a list
+			node["name"] = [n['name'] for n in nodes]
+			node["size"] = sum([counts[names.index(n['name'])] for n in nodes])
+		elif flatten=="hidden":
+			#flatten the children into a value, use the largest child as main name
+			# better would be to sort by size
+			# change title to word wrap?
+			best = np.argmax([counts[names.index(n['name'])] for n in nodes])
+			node["name"] = nodes[best]['name']+"*"
+			node["size"] = sum([counts[names.index(n['name'])] for n in nodes])
+			node["value"] = [n['name'] for n in nodes]
+		else:
+			#dflatten the hierarchy, count the nodes, and drop the name
+			node["name"] = str(int(id))
+			node["size"] = len(nodes)
 	#otherwise, recurse down the branches
 	else:
 		node["name"] = str(int(id))
-		node["children"] = [jsontree(links, int(left), names, counts, min_d, min_s),jsontree(links, int(right), names, counts, min_d, min_s)]
+		node["children"] = [jsontree(links, int(left), names, counts, min_d, min_s,flatten=flatten),jsontree(links, int(right), names, counts, min_d, min_s,flatten=flatten)]
 	if id == 2*clusters.shape[0]:
 		print "created a total of " + str(jsontree_tally) + " clusters."
 	return node
