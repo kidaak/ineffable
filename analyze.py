@@ -411,6 +411,44 @@ def flatjson(links, names, counts, id):
 			json.dump(stops, outfile)
 			print "Dumped stopwords to file."
 
+def heatcsv(rows, columns, c):
+	cross = False
+	if len(rows)==len(columns):
+		cross = True
+		for n, row in enumerate(rows):
+			if rows[n] != columns[n]:
+				cross = False
+	import matplotlib.pyplot as plt
+	from sklearn.feature_selection import chi2
+	column_labels = columns
+	row_labels = rows
+	data = np.zeros((len(rows),len(columns)))
+	for y,col in enumerate(columns):
+		labels = [(col in row) for row in all_index]
+		mat = np.zeros((len(experiences),len(rows)))
+		for i,exp in enumerate(experiences):
+			for j,row in enumerate(rows):
+				if row in all_index[i]:
+					mat[i,j] = True
+				else:
+					mat[i,j] = False
+		chisq, p = chi2(mat, labels)
+		for x,cs in enumerate(chisq):
+			data[x,y] = cs
+		print "finished " + col
+	if cross==True:
+		for y,col in enumerate(columns):
+			for x,row in enumerate(rows):
+				if x <= y:
+					data[x,y] = None
+	with open(path + '/gh-pages/' + c + '.csv','wb')  as f:
+		import csv
+		writer = csv.writer(f)
+		writer.writerow(["rowname"] + columns)
+		for i in range(len(rows)):
+			writer.writerow([rows[i]] + data[i].tolist())
+
+heatcsv(sorted(tag_count.keys()),sorted(subs100.keys()),"heatmap")
 
 	def heatmap(rows, columns):
 		cross = False
