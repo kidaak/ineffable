@@ -3,18 +3,24 @@
 <html>
 <head>
 </head>
-<body>
+<body onload="init()">
 <style>
 </style>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="http://d3js.org/d3.v3.js"></script>
 <script>
-var csv_data = [];
-for(var i = 0; i<10; i++) {
-	csv_data.push({row: "row" + i});
-	for (var j = 0; j<10; j++) {
-		csv_data[i]["variable" + j] = Math.random();
-	}
+$.urlParam = function(name){
+	var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (!results) {return 0;}
+	return results[1] || 0;
 }
+
+var dummy;
+function init() {
+
+
+
+
 var width = 1000, height = 1000;
 var topMargin = 50, leftMargin = 50;
 
@@ -25,14 +31,34 @@ var svg = d3.select("body")
 ;
 
 var nQuants = 4;
-var cellHeight = 25;
-var cellWidth = 25;
+var cellHeight = 50;
+var cellWidth = 50;
 var nRows;
 var nCols;
 var columns;
 var rows;
+
+var csv_placeholder = [];
+for(var i = 0; i<10; i++) {
+	csv_placeholder.push({row: "row" + i});
+	for (var j = 0; j<10; j++) {
+		csv_placeholder[i]["variable" + j] = Math.random();
+	}
+}
+
+var csv = $.urlParam("csv");
+var csv_data;
+if (csv===0) {
+	csv_data = csv_placeholder;
+	callback(csv_data);
+} else {
+	d3.csv("test.csv", function(error, d) {
+		csv_data = d;
+		callback(csv_data);
+	})
+}
 function callback(data) {
-	//csv_data = data;
+	csv_data = data;
 	columns = d3.map(csv_data[0]).keys();
 	columns.shift();
 	rows = csv_data.map(function(row) {return row["row"];})
@@ -42,7 +68,7 @@ function callback(data) {
 			flattened.push(csv_data[i][columns[j]]);
 		}
 	}
-	
+
 	var quantiles = [];
 	for(var i = 0; i<=nQuants; i++) {
 		quantiles.push(d3.quantile(flattened,i/nQuants));
@@ -51,7 +77,7 @@ function callback(data) {
 		.domain(quantiles)
 		.range(["white","red"])
 	;
-	
+
 	//should I check whether the two axes are the same to do a half graph?
 	svg.selectAll("g")
 		.attr("transform","translate("+leftMargin+","+topMargin+")")
@@ -70,7 +96,7 @@ function callback(data) {
 	var x = d3.scale.ordinal()
 		.domain(columns.concat(" "))
 		.rangePoints([0,columns.length*cellWidth])
-		
+
 	;
 	var y = d3.scale.ordinal()
 		.domain(rows.concat(" "))
@@ -81,6 +107,7 @@ function callback(data) {
 		.orient("top")
 		.outerTickSize(cellWidth)
 	;
+	//secondary axes not yet implemented
 	var xAxis2 = d3.svg.axis()
 		.scale(x)
 		.orient("bottom")
@@ -90,6 +117,7 @@ function callback(data) {
 		.scale(y)
 		.orient("left")
 	;
+	//secondary axes not yet implemented
 	var yAxis2 = d3.svg.axis()
 		.scale(y)
 		.orient("right")
@@ -101,20 +129,9 @@ function callback(data) {
 		.style("stroke","black")
 		.attr("transform","translate(" + leftMargin+","+topMargin+")")
 	  .selectAll("text")
-	  	.attr("transform","translate(" + cellWidth + ",-10) rotate(-45)")
+	  	.attr("transform","translate(" + 0.75*cellWidth + ",-10) rotate(-45)")
 	  	.style("font-size","10px")
-	  	
-	;
-	svg.append("g")
-		.attr("class","axis")
-		.call(xAxis)
-		.style("fill","none")
-		.style("stroke","black")
-		.attr("transform","translate(" + leftMargin+columns.length*cellWidth+","+topMargin+")")
-	  .selectAll("text")
-	  	.attr("transform","translate(" + cellWidth + ",-10) rotate(-45)")
-	  	.style("font-size","10px")
-	  	
+
 	;
 	svg.append("g")
 		.attr("class","axis")
@@ -126,10 +143,13 @@ function callback(data) {
 	  	.attr("transform","translate(0," + 0.5*cellHeight+")")
 		.style("font-size","10px")
 	;
-	
-}
 
+
+
+}
 callback(csv_data);
+
+}
 </script>
 </body>
 </html>
