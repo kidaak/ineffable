@@ -15,11 +15,13 @@ for(var i = 0; i<10; i++) {
 		csv_data[i]["variable" + j] = Math.random();
 	}
 }
+var width = 1000, height = 1000;
+var topMargin = 50, leftMargin = 50;
 
 var svg = d3.select("body")
   .append("svg")
-  	.attr("width",1000)
-  	.attr("height",1000)
+  	.attr("width",width)
+  	.attr("height",height)
 ;
 
 var nQuants = 4;
@@ -34,14 +36,6 @@ function callback(data) {
 	columns = d3.map(csv_data[0]).keys();
 	columns.shift();
 	rows = csv_data.map(function(row) {return row["row"];})
-	var x = d3.scale.ordinal()
-		.domain(columns)
-		.range(d3.range(columns.length))
-	;
-	var y = d3.scale.ordinal()
-		.domain(rows)
-		.range(rows.length)
-	;
 	var flattened = [];
 	for(var i = 0; i<rows.length; i++) {
 		for(var j = 0; j<columns.length; j++) {
@@ -59,27 +53,78 @@ function callback(data) {
 	;
 	
 	//should I check whether the two axes are the same to do a half graph?
-	//var xAxis = d3.svg.axis()
-	//	.scale(x)
-	//;
-	//var yAxis = d3.svg.axis()
-	//	.scale(y)
-	//;
-	//svg.append("g")
-	//	.call(xAxis)
-	//;
-	//svg.append("g")
-	//	.call(yAxis)
-	//;
 	svg.selectAll("g")
+		.attr("transform","translate("+leftMargin+","+topMargin+")")
 		.data(csv_data).enter()
 	  .append("g")
-		.attr("transform",function(d,i) {return "translate(0," + i*cellHeight + ")";})
+		.attr("transform", function(d,i) {return "translate(" + leftMargin + "," + (topMargin+i*cellHeight) + ")";})
 	  .selectAll("rect")
-		.data(function(row) {columns.map(function(i) {return row[columns[i]];})}).enter()
-	 // .append("rect")
-	  //	.attr("x",function(d,i) {return i*cellWidth;})
-	  	//.style("fill",function(d) {return color(i);})
+	.data(function(row) {return columns.map(function(d) {return row[d];})}).enter()
+	  .append("rect")
+		.attr("x",function(d,i) {return i*cellWidth;})
+		.attr("y",0)
+		.attr("height",cellHeight)
+		.attr("width",cellWidth)
+		.style("fill",function(d) {return color(d);})
+	;
+	var x = d3.scale.ordinal()
+		.domain(columns.concat(" "))
+		.rangePoints([0,columns.length*cellWidth])
+		
+	;
+	var y = d3.scale.ordinal()
+		.domain(rows.concat(" "))
+		.rangePoints([0,rows.length*cellHeight])
+	;
+	var xAxis = d3.svg.axis()
+		.scale(x)
+		.orient("top")
+		.outerTickSize(cellWidth)
+	;
+	var xAxis2 = d3.svg.axis()
+		.scale(x)
+		.orient("bottom")
+		.outerTickSize(cellWidth)
+	;
+	var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left")
+	;
+	var yAxis2 = d3.svg.axis()
+		.scale(y)
+		.orient("right")
+	;
+	svg.append("g")
+		.attr("class","axis")
+		.call(xAxis)
+		.style("fill","none")
+		.style("stroke","black")
+		.attr("transform","translate(" + leftMargin+","+topMargin+")")
+	  .selectAll("text")
+	  	.attr("transform","translate(" + cellWidth + ",-10) rotate(-45)")
+	  	.style("font-size","10px")
+	  	
+	;
+	svg.append("g")
+		.attr("class","axis")
+		.call(xAxis)
+		.style("fill","none")
+		.style("stroke","black")
+		.attr("transform","translate(" + leftMargin+columns.length*cellWidth+","+topMargin+")")
+	  .selectAll("text")
+	  	.attr("transform","translate(" + cellWidth + ",-10) rotate(-45)")
+	  	.style("font-size","10px")
+	  	
+	;
+	svg.append("g")
+		.attr("class","axis")
+		.call(yAxis)
+		.style("fill","none")
+		.style("stroke","black")
+		.attr("transform","translate(" + leftMargin+","+topMargin+")")
+	  .selectAll("text")
+	  	.attr("transform","translate(0," + 0.5*cellHeight+")")
+		.style("font-size","10px")
 	;
 	
 }
