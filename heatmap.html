@@ -15,21 +15,18 @@ $.urlParam = function(name){
 	return results[1] || 0;
 }
 
-var dummy;
+var csv_data;
 function init() {
 
 
+var topMargin = 50, leftMargin = 150;
 
-
-var width = 1000, height = 1000;
-var topMargin = 50, leftMargin = 50;
-
+var width = 5000, height = 1000;
 var svg = d3.select("body")
   .append("svg")
   	.attr("width",width)
   	.attr("height",height)
 ;
-
 var nQuants = 4;
 var cellHeight = 50;
 var cellWidth = 50;
@@ -46,17 +43,21 @@ for(var i = 0; i<10; i++) {
 	}
 }
 
+
 var csv = $.urlParam("csv");
-var csv_data;
 if (csv===0) {
 	csv_data = csv_placeholder;
 	callback(csv_data);
 } else {
-	d3.csv("test.csv", function(error, d) {
+	d3.csv(csv+".csv", function(error, d) {
 		csv_data = d;
+		width = d3.map(csv_data[0]).keys().length*cellWidth+leftMargin;
+		height = csv_data.length*cellHeight+topMargin;
+		svg.attr("width",width).attr("height",height);
 		callback(csv_data);
 	})
 }
+
 function callback(data) {
 	csv_data = data;
 	columns = d3.map(csv_data[0]).keys();
@@ -108,20 +109,20 @@ function callback(data) {
 		.outerTickSize(cellWidth)
 	;
 	//secondary axes not yet implemented
-	var xAxis2 = d3.svg.axis()
-		.scale(x)
-		.orient("bottom")
-		.outerTickSize(cellWidth)
-	;
+	//var xAxis2 = d3.svg.axis()
+	//	.scale(x)
+	//	.orient("bottom")
+	//	.outerTickSize(cellWidth)
+	//;
 	var yAxis = d3.svg.axis()
 		.scale(y)
 		.orient("left")
 	;
 	//secondary axes not yet implemented
-	var yAxis2 = d3.svg.axis()
-		.scale(y)
-		.orient("right")
-	;
+	//var yAxis2 = d3.svg.axis()
+	//	.scale(y)
+	//	.orient("right")
+	//;
 	svg.append("g")
 		.attr("class","axis")
 		.call(xAxis)
